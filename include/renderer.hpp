@@ -12,6 +12,7 @@ struct renderer
 	void render(const ld50::state& state);
 
 private:
+	g::gfx::mesh<g::gfx::vertex::pos_norm> sky_sphere;
 	g::asset::store& assets;
 };
 

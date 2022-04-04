@@ -12,7 +12,17 @@ void draw_game(g::asset::store& assets, const ld50::state& state)
 
 ld50::renderer::renderer(g::asset::store& a) : assets(a)
 {
+	auto sphere = [](const vec<3>& p) -> float { return 1 - p.magnitude(); };
+	auto gen = [](const g::game::sdf& sdf, const vec<3>& pos) -> g::gfx::vertex::pos_norm
+	{
+		return { pos, -pos.unit() };
+	};
+	vec<3> corners[] = {
+		{ -100,-100,-100 },
+		{  100, 100, 100 },
+	};
 
+	sky_sphere = g::gfx::mesh_factory::from_sdf<g::gfx::vertex::pos_norm>(sphere, gen, corners);
 }
 
 void ld50::renderer::render(const ld50::state& state)
