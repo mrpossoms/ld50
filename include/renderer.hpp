@@ -12,6 +12,7 @@ struct renderer
 	void render(ld50::state& state);
 
 private:
+	g::gfx::texture white_noise_rgb;
 	g::gfx::mesh<g::gfx::vertex::pos_norm> sky_sphere;
 	g::asset::store& assets;
 };
