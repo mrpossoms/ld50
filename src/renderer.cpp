@@ -25,10 +25,15 @@ ld50::renderer::renderer(g::asset::store& a) : assets(a)
 	sky_sphere = g::gfx::mesh_factory::from_sdf<g::gfx::vertex::pos_norm>(sphere, gen, corners);
 }
 
-void ld50::renderer::render(const ld50::state& state)
+void ld50::renderer::render(ld50::state& state)
 {
 	glClearColor(0.5, 0.5, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	sky_sphere.using_shader(assets.shader("position_normal.vs+normal_debug.fs"))
+	.set_camera(state.my.camera)
+	["u_model"].mat4(mat<4, 4>::I())
+	.draw<GL_TRIANGLES>();
 
 	// draw appropriately depending on state
 	switch(state.current)

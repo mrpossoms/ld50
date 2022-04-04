@@ -9,7 +9,7 @@ struct renderer
 {
 	renderer(g::asset::store& assets);
 
-	void render(const ld50::state& state);
+	void render(ld50::state& state);
 
 private:
 	g::gfx::mesh<g::gfx::vertex::pos_norm> sky_sphere;
