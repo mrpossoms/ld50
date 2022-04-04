@@ -6,23 +6,21 @@ struct ld50_game : public g::core
 {
 	g::asset::store assets;
 	ld50::state state;
-	ld50::renderer renderer;
+	std::unique_ptr<ld50::renderer> renderer;
 
-	ld50_game() : renderer(assets)
-	{
-
-	}
-
+	ld50_game() = default;
 	~ld50_game() = default;
 
 	virtual bool initialize()
 	{
+		renderer = std::make_unique<ld50::renderer>(assets);
+
 		return true;
 	}
 
 	virtual void update(float dt)
 	{
-		renderer.render(state);
+		renderer->render(state);
 	}
 
 };
@@ -43,7 +41,7 @@ int main (int argc, const char* argv[])
 
 	g::core::opts opts;
 
-	opts.name = "my game";
+	opts.name = "ld50";
 	opts.gfx.fullscreen = false;
 
 #ifdef __EMSCRIPTEN__
