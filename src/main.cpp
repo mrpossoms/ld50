@@ -1,12 +1,18 @@
 #include "g.h"
 #include "state.hpp"
+#include "renderer.hpp"
 
 struct ld50_game : public g::core
 {
 	g::asset::store assets;
 	ld50::state state;
+	ld50::renderer renderer;
 
-	ld50_game() = default;
+	ld50_game() : renderer(assets)
+	{
+
+	}
+
 	~ld50_game() = default;
 
 	virtual bool initialize()
@@ -16,8 +22,7 @@ struct ld50_game : public g::core
 
 	virtual void update(float dt)
 	{
-		glClearColor(0.5, 0.5, 1.0, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		renderer.render(state);
 	}
 
 };

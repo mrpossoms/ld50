@@ -1,0 +1,29 @@
+#include "renderer.hpp"
+
+void draw_splash(g::asset::store& assets, const ld50::state& state)
+{
+
+}
+
+void draw_game(g::asset::store& assets, const ld50::state& state)
+{
+
+}
+
+ld50::renderer::renderer(g::asset::store& a) : assets(a)
+{
+
+}
+
+void ld50::renderer::render(const ld50::state& state)
+{
+	glClearColor(0.5, 0.5, 1.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// draw appropriately depending on state
+	switch(state.current)
+	{
+		case game_state::splash: draw_splash(assets, state); break;
+		case game_state::game: draw_game(assets, state); break;
+	}
+}
