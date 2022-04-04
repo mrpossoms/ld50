@@ -1,14 +1,13 @@
 #include "g.h"
 #include "state.hpp"
 
-struct my_game : public g::core
+struct ld50_game : public g::core
 {
-
 	g::asset::store assets;
-	game::state state;
+	ld50::state state;
 
-	my_game() = default;
-	~my_game() = default;
+	ld50_game() = default;
+	~ld50_game() = default;
 
 	virtual bool initialize()
 	{
@@ -35,7 +34,7 @@ EM_JS(int, canvas_get_height, (), {
 
 int main (int argc, const char* argv[])
 {
-	my_game game;
+	ld50_game game;
 
 	g::core::opts opts;
 
