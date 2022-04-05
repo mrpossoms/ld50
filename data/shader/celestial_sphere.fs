@@ -24,8 +24,10 @@ void main(void)
 	noise += texture(u_noise, uvw.xz).g * w_y;
 	noise += texture(u_noise, uvw.xy).b * w_z;
 
+	float w = (dot(v_normal, vec3(0, 0, -1)) + 1.0) * 0.5;
+	vec3 color_shift = mix(vec3(0.05, 0.05, 0.15), vec3(0.15, 0.05, 0.05), w);
 	float p = dot(vec3(n.x, 0, n.z), n);
-	vec3 textel_color = mix(vec3(0.0, 0.0, 0.0), vec3(0.25, 0.25, 0.25), pow(p, 32));
+	vec3 textel_color = mix(vec3(0.0, 0.0, 0.0), color_shift, pow(p, 32));
 	color = vec4(textel_color, 1.0);
 
 	if ((noise * p) < 0.9)
