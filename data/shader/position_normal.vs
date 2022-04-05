@@ -13,7 +13,7 @@ void main(void)
 	vec4 v_world_pos = u_model * vec4(a_position, 1.0);
 	gl_Position = u_proj * u_view * v_world_pos;
 
-	v_position = gl_Position.xyz;
+	v_position = v_world_pos.xyz;
 
 	mat3 model_rot = mat3(normalize(u_model[0].xyz), normalize(u_model[1].xyz), normalize(u_model[2].xyz));
 	v_normal = normalize(model_rot * a_normal);

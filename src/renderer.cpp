@@ -12,24 +12,27 @@ void draw_game(g::asset::store& assets, const ld50::state& state)
 
 ld50::renderer::renderer(g::asset::store& a) : assets(a)
 {
+	
+	
 	{ // create sky sphere geometry
-		auto sphere = [](const vec<3>& p) -> float { return 100 - p.magnitude(); };
+		auto sphere = [](const vec<3>& p) -> float { return 1 - p.magnitude(); };
 		auto gen = [](const g::game::sdf& sdf, const vec<3>& pos) -> g::gfx::vertex::pos_norm
 		{
 			return { pos, -pos.unit() };
 		};
 		vec<3> corners[] = {
-			{ -100,-100,-100 },
-			{  100, 100, 100 },
+			{ -1,-1,-1 },
+			{  1, 1, 1 },
 		};
 		sky_sphere = g::gfx::mesh_factory::from_sdf<g::gfx::vertex::pos_norm>(sphere, gen, corners);
 	}
 
 	{ // create noise textures
-		white_noise_rgb = g::gfx::texture_factory{ 128, 128 }
+		white_noise_rgb = g::gfx::texture_factory{ 512, 512 }
 		.components(3)
 		.type(GL_UNSIGNED_BYTE)
 		.repeating()
+		.pixelated()
 		.fill([](int x, int y, int z, unsigned char* pixel) {
 			unsigned r = random();
 			pixel[0] = 0xff & (r >> 16);
