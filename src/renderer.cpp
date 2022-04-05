@@ -15,7 +15,7 @@ ld50::renderer::renderer(g::asset::store& a) : assets(a)
 {
 	
 	
-	{ // create sky sphere geometry
+	{ // create sky sphere geometry.
 		auto sphere = [](const vec<3>& p) -> float { return 100 - p.magnitude(); };
 		auto gen = [](const g::game::sdf& sdf, const vec<3>& pos) -> g::gfx::vertex::pos_norm
 		{
