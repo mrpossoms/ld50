@@ -19,7 +19,7 @@ struct body : public dyn::particle
 {
 	float mass;
 	std::vector<body> satellites;
-
+	std::string model_name;
 };
 
 struct player : public dyn::rigid_body

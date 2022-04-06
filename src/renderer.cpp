@@ -1,6 +1,8 @@
 #include "renderer.hpp"
 #include <random>
 
+using mat4 = xmath::mat<4, 4>;
+
 void draw_splash(g::asset::store& assets, const ld50::state& state)
 {
 
@@ -47,6 +49,21 @@ ld50::renderer::renderer(g::asset::store& a) : assets(a)
 	}
 }
 
+static void render_bodies(g::asset::store& assets, ld50::body& b, g::game::camera& cam)
+{
+	auto& planet_shader = assets.shader("pos_uv_norm.vs+body.fs");
+
+	assets.geo(b.model_name).using_shader(planet_shader)
+	.set_camera(cam)
+	["u_model"].mat4(mat4::I())
+	.draw<GL_TRIANGLES>();
+
+	for (auto& sat : b.satellites)
+	{
+		render_bodies(assets, sat, cam);
+	}
+}
+
 void ld50::renderer::render(ld50::state& state)
 {
 	glClearColor(0.5, 0.5, 1.0, 1.0);
@@ -63,13 +80,30 @@ void ld50::renderer::render(ld50::state& state)
 		sky_sphere.using_shader(assets.shader("position_normal.vs+celestial_sphere.fs"))
 			["u_view"].mat4(rotation_only)
 			["u_proj"].mat4(state.my.camera.projection())
-			["u_model"].mat4(mat<4, 4>::I())
+			["u_model"].mat4(mat4::I())
 			["u_noise"].texture(white_noise_rgb)
 			.draw<GL_TRIANGLES>();
 		glDepthMask(GL_TRUE);
 	}
 
+	{ // draw bodies
+		for (auto& body : state.bodies)
+		{
+			render_bodies(assets, body, state.my.camera);
+		}
+	}
 
+	{ // draw players
+		auto& player_shader = assets.shader("pos_uv_norm.vs+body.fs");
+
+		for (auto& player : state.players)
+		{
+			assets.geo("player.hull.obj").using_shader(player_shader)
+			.set_camera(state.my.camera)
+			["u_model"].mat4(player.transform())
+			.draw<GL_TRIANGLES>();			
+		}
+	}
 
 	// draw appropriately depending on state
 	switch(state.current)

@@ -32,6 +32,8 @@ struct ld50_game : public g::core
 	{
 		renderer = std::make_unique<ld50::renderer>(assets);
 
+		state.players.push_back({});
+
 		return true;
 	}
 
