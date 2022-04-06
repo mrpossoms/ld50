@@ -1,0 +1,7 @@
+geometry:
+  hull: player.hull.obj
+textures:
+  diffuse: player.diffuse.png
+traits:
+  thrust_per_fuel: 1
+  fuel: 100
