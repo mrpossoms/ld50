@@ -52,6 +52,8 @@ struct state
 	struct {
 		float radius = 0;
 	} super_nova;
+
+	inline player& my_player() { return players[my.player_index]; }
 };
 
 } // namespace game

@@ -13,7 +13,7 @@ void draw_game(g::asset::store& assets, const ld50::state& state)
 
 }
 
-ld50::renderer::renderer(g::asset::store& a) : assets(a)
+ld50::renderer::renderer(g::asset::store& a, std::unordered_map<std::string, g::game::object>& m) : assets(a), object_map(m)
 {
 	
 	
@@ -100,7 +100,7 @@ void ld50::renderer::render(ld50::state& state)
 		{
 			assets.geo("player.hull.obj").using_shader(player_shader)
 			.set_camera(state.my.camera)
-			["u_model"].mat4(player.transform())
+			["u_model"].mat4(player.orientation.inverse().to_matrix() * mat<4, 4>::translation(player.position))
 			.draw<GL_TRIANGLES>();			
 		}
 	}
