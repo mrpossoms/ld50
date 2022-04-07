@@ -34,6 +34,8 @@ struct ld50_game : public g::core
 
 		state.players.push_back({});
 
+		state.current = ld50::game_state::game;
+
 		glfwSetInputMode(g::gfx::GLFW_WIN, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
@@ -45,7 +47,7 @@ struct ld50_game : public g::core
 		object("data/player-ship.yaml", {
 			{ "traits", {
 				{ "fuel", 100 },
-				{ "thrust_per_fuel", 1 },
+				{ "thrust_per_fuel", 2 },
 				{ "cam_x", 0},
 				{ "cam_y", 0},
 				{ "cam_z", 2},
@@ -66,10 +68,11 @@ struct ld50_game : public g::core
 
 		// update the player's camera
 		auto& player_ship = state.my_player();
-		//state.my.camera.look_at(player_ship.position);// , player_ship.orientation.inverse().rotate({ 0, 1, 0 }));
-		state.my.camera.orientation = player_ship.orientation;// .inverse();
-		auto camera_orbit_target = player_ship.orientation.rotate(cam_pos);
+		auto camera_orbit_target = player_ship.to_global(cam_pos) + player_ship.position;
 		state.my.camera.position = state.my.camera.position.lerp(camera_orbit_target, dt * player_traits["cam_spring"].number);
+		state.my.camera.orientation = player_ship.orientation.inverse();
+
+
 
 		static double xlast, ylast;
 		float sensitivity = 0.5f;
@@ -99,13 +102,13 @@ struct ld50_game : public g::core
 
 				if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 				{
-					player_ship.orientation = quat<>::from_axis_angle({ 0, 1, 0 }, dx * dt * sensitivity) * player_ship.orientation;
-					player_ship.orientation *= quat<>::from_axis_angle({ 1, 0, 0 }, -dy * dt * sensitivity);
+					auto d_o = quat<>::from_axis_angle({ 0, 1, 0 }, dx * dt * sensitivity) * quat<>::from_axis_angle({ 1, 0, 0 }, -dy * dt * sensitivity);
+					player_ship.orientation = d_o * player_ship.orientation;
 				}
 
 				if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS)
 				{
-					player_ship.velocity += player_ship.forward() * dt;
+					player_ship.dyn_apply_local_force({ 0, 0, 0 }, { 0, 0, -10 });
 				}
 			}
 		xlast = xpos; ylast = ypos;
@@ -114,6 +117,8 @@ struct ld50_game : public g::core
 
 
 		renderer->render(state);
+
+		state.time += dt;
 	}
 
 };

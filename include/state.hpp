@@ -34,13 +34,13 @@ struct player : public dyn::rigid_body
 
 	player()
 	{
-		mass = 1000;
+		mass = 1;
 	}
 
 	player(const vec<3>& p)
 	{
 		position = p;
-		mass = 1000;
+		mass = 1;
 	}
 };
 
