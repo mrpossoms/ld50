@@ -47,6 +47,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGL_SILENCE_DEPRECATION")
 # add all source files
 set(SOURCE ${SOURCE} src/main.cpp)
 set(SOURCE ${SOURCE} src/renderer.cpp)
+set(SOURCE ${SOURCE} src/mechanics.cpp)
 
 # add game includes
 include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -20,6 +20,11 @@ struct body : public dyn::particle
 	float mass;
 	std::vector<body> satellites;
 	std::string model_name;
+
+	vec<3> position_at(float t) const
+	{
+		return {};
+	}
 };
 
 struct player : public dyn::rigid_body

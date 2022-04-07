@@ -70,6 +70,7 @@ struct ld50_game : public g::core
 		state.my.camera.orientation = player_ship.orientation;// .inverse();
 		auto camera_orbit_target = player_ship.orientation.rotate(cam_pos);
 		state.my.camera.position = state.my.camera.position.lerp(camera_orbit_target, dt * player_traits["cam_spring"].number);
+		state.my_player().velocity = { 0, 0, 1 };
 
 		static double xlast, ylast;
 		float sensitivity = 0.5f;

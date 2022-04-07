@@ -1,4 +1,5 @@
 #include "renderer.hpp"
+#include "mechanics.hpp"
 #include <random>
 
 using mat4 = xmath::mat<4, 4>;
@@ -64,6 +65,19 @@ static void render_bodies(g::asset::store& assets, ld50::body& b, g::game::camer
 	}
 }
 
+static void draw_trajectory(ld50::state& state)
+{
+	auto x = state.my_player().position;
+	auto x_prime = state.my_player().velocity;
+
+	for (float t = state.time; t < state.time + 60; t += 1)
+	{
+		x_prime += ld50::acceleration_at_point(state, x, t);
+		x += x_prime;
+		g::gfx::debug::print{ &state.my.camera }.color({ 0, 1, 0, 1 }).point(x);
+	}
+}
+
 void ld50::renderer::render(ld50::state& state)
 {
 	glClearColor(0.5, 0.5, 1.0, 1.0);
@@ -98,12 +112,15 @@ void ld50::renderer::render(ld50::state& state)
 
 		for (auto& player : state.players)
 		{
-			assets.geo("player.hull.obj").using_shader(player_shader)
+			object_map["data/player-ship.yaml"].geometry("hull").using_shader(player_shader)
 			.set_camera(state.my.camera)
 			["u_model"].mat4(player.orientation.inverse().to_matrix() * mat<4, 4>::translation(player.position))
 			.draw<GL_TRIANGLES>();			
 		}
 	}
+
+	// draw traj
+	draw_trajectory(state);
 
 	// draw appropriately depending on state
 	switch(state.current)
