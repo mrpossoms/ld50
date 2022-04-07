@@ -1,7 +1,5 @@
 # Blender v3.1.2 OBJ File: 'planets.blend'
 # www.blender.org
-mtllib planet_1.mtl
-o Icosphere.022
 v 224.584183 -65.738297 -24.998323
 v 231.333237 -60.582531 -20.094906
 v 222.006317 -60.582535 -17.064354

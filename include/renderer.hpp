@@ -16,8 +16,8 @@ struct renderer
 
 private:
 
-	void ld50::renderer::draw_splash(ld50::state& state);
-	void ld50::renderer::draw_game(ld50::state& state);
+	void draw_splash(ld50::state& state);
+	void draw_game(ld50::state& state);
 
 	g::gfx::texture white_noise_rgb;
 	g::gfx::mesh<g::gfx::vertex::pos_norm> sky_sphere;

@@ -1,4 +1,4 @@
-layout(location=0) in vec3 v_normal;
+in vec3 v_normal;
 
 out vec4 color;
 

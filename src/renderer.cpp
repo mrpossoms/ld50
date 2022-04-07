@@ -71,12 +71,17 @@ void ld50::renderer::draw_game(ld50::state& state)
 
 	auto x = state.my_player().position;
 	auto x_prime = state.my_player().velocity;
-	for (float t = state.time; t < state.time + 100; t++)
+	auto dt = 0.1f;
+	for (float t = state.time; t < state.time + 100; t += dt)
 	{
-		x_prime += acceleration_at_point(state, x, t);
-		x += x_prime;
+		auto acc = acceleration_at_point(state, x, t);
+		x_prime += acc * dt;
+		auto x_1 = x + x_prime * dt;
 
-		g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(x, x_prime);
+		auto a = 1 - ((t - state.time) / 100.f);
+		g::gfx::debug::print{ &state.my.camera }.color({ x_prime.magnitude() * 0.1, 0.1, 0.1, a }).ray(x, x_1 - x);
+
+		x = x_1;
 	}
 
 	g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(vec<3>{}, vec<3>{ 1000, 0, 0 });

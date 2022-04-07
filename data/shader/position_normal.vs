@@ -1,8 +1,8 @@
 in vec3 a_position;
 in vec3 a_normal;
 
-layout(location = 0) out vec3 v_position;
-layout(location = 1) out vec3 v_normal;
+out vec3 v_position;
+out vec3 v_normal;
 
 uniform mat4 u_model;
 uniform mat4 u_view;
