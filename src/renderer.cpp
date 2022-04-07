@@ -1,4 +1,5 @@
 #include "renderer.hpp"
+#include "mechanics.hpp"
 #include <random>
 
 using mat4 = xmath::mat<4, 4>;
@@ -42,10 +43,10 @@ void ld50::renderer::draw_game(ld50::state& state)
 	}
 
 	{ // draw bodies
-		for (auto& body : state.bodies)
-		{
-			render_bodies(assets, body, state.my.camera);
-		}
+		//for (auto& body : state.bodies)
+		//{
+		//	render_bodies(assets, body, state.my.camera);
+		//}
 	}
 
 	{ // draw players
@@ -66,6 +67,16 @@ void ld50::renderer::draw_game(ld50::state& state)
 			glEnable(GL_DEPTH_TEST);
 		}
 		glEnable(GL_CULL_FACE);
+	}
+
+	auto x = state.my_player().position;
+	auto x_prime = state.my_player().velocity;
+	for (float t = state.time; t < state.time + 100; t++)
+	{
+		x_prime += acceleration_at_point(state, x, t);
+		x += x_prime;
+
+		g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(x, x_prime);
 	}
 
 	g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(vec<3>{}, vec<3>{ 1000, 0, 0 });

@@ -1,6 +1,7 @@
 #include "g.h"
 #include "state.hpp"
 #include "renderer.hpp"
+#include "mechanics.hpp"
 
 struct ld50_game : public g::core
 {
@@ -32,7 +33,15 @@ struct ld50_game : public g::core
 	{
 		renderer = std::make_unique<ld50::renderer>(assets, object_map);
 
-		state.players.push_back({});
+
+		ld50::body b;
+		b.mass = 100;
+		state.bodies.push_back(b);
+
+		ld50::player p;
+		p.position = { 20, 0, 0 };
+		p.linear_momentum = { 0, 0, -10 };
+		state.players.push_back(p);
 
 		state.current = ld50::game_state::game;
 
@@ -113,6 +122,7 @@ struct ld50_game : public g::core
 			}
 		xlast = xpos; ylast = ypos;
 
+		player_ship.dyn_apply_global_force(player_ship.position, ld50::acceleration_at_point(state, player_ship.position, state.time));
 		player_ship.dyn_step(dt);
 
 

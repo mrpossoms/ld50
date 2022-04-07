@@ -4,12 +4,10 @@ vec<3> ld50::acceleration_at_point(const ld50::state& state, const vec<3>& pos, 
 {
 	std::function<vec<3>(const vec<3>&, const ld50::body&, vec<3>)> net_acc = [&](const vec<3>& parent_pos, const ld50::body& b, vec<3> pos) -> vec<3> 
 	{
-		vec<3> a = {};
-
 		auto G = 1;
 		auto p = parent_pos + b.position_at(t);
 		auto r = p - pos;
-		auto f = r * G * b.mass / r.dot(r);
+		vec<3> a = r * G * b.mass / r.dot(r);
 
 		for (auto& b : b.satellites)
 		{
