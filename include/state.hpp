@@ -29,8 +29,19 @@ struct body : public dyn::particle
 
 struct player : public dyn::rigid_body
 {
-	float fuel;
-	float thrust_per_fuel;
+	float fuel = 1000;
+	float thrust_per_fuel = 1;
+
+	player()
+	{
+		mass = 1000;
+	}
+
+	player(const vec<3>& p)
+	{
+		position = p;
+		mass = 1000;
+	}
 };
 
 struct state

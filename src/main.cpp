@@ -70,7 +70,6 @@ struct ld50_game : public g::core
 		state.my.camera.orientation = player_ship.orientation;// .inverse();
 		auto camera_orbit_target = player_ship.orientation.rotate(cam_pos);
 		state.my.camera.position = state.my.camera.position.lerp(camera_orbit_target, dt * player_traits["cam_spring"].number);
-		state.my_player().velocity = { 0, 0, 1 };
 
 		static double xlast, ylast;
 		float sensitivity = 0.5f;
@@ -103,15 +102,15 @@ struct ld50_game : public g::core
 					player_ship.orientation = quat<>::from_axis_angle({ 0, 1, 0 }, dx * dt * sensitivity) * player_ship.orientation;
 					player_ship.orientation *= quat<>::from_axis_angle({ 1, 0, 0 }, -dy * dt * sensitivity);
 				}
-			}
 
+				if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS)
+				{
+					player_ship.velocity += player_ship.forward() * dt;
+				}
+			}
 		xlast = xpos; ylast = ypos;
-		//if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_Q) == GLFW_PRESS) cam.d_roll(-dt);
-		//if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_E) == GLFW_PRESS) cam.d_roll(dt);
-		if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_LEFT) == GLFW_PRESS)  //cam.d_yaw(-dt);
-		if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_RIGHT) == GLFW_PRESS) player_ship.orientation *= quat<>::from_axis_angle({ 0, 1, 0 }, -dt);//cam.d_yaw(dt);
-		if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_UP) == GLFW_PRESS) player_ship.orientation *= quat<>::from_axis_angle({ 1, 0, 0 }, dt);
-		if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_DOWN) == GLFW_PRESS) player_ship.orientation *= quat<>::from_axis_angle({ 1, 0, 0 }, -dt);
+
+		player_ship.dyn_step(dt);
 
 
 		renderer->render(state);
