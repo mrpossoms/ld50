@@ -186,8 +186,8 @@ int main (int argc, const char* argv[])
 
 	opts.name = "ld50";
 	opts.gfx.fullscreen = false;
-	opts.gfx.width = 1024;
-	opts.gfx.height = 768;
+	// opts.gfx.width = 1024;
+	// opts.gfx.height = 768;
 
 #ifdef __EMSCRIPTEN__
 	auto monitor = glfwGetPrimaryMonitor();
