@@ -42,9 +42,18 @@ struct ld50_game : public g::core
 		renderer = std::make_unique<ld50::renderer>(assets, object_map);
 
 
-		ld50::body b;
-		b.mass = 100;
-		state.bodies.push_back(b);
+		ld50::body star;
+		star.mass = 100;
+		star.radius = 5;
+		
+		ld50::body planet;
+		planet.mass = 10;
+		planet.radius = 2;
+
+
+		star.satellites.push_back(planet);
+
+		state.bodies.push_back(star);
 
 		ld50::player p;
 		p.position = { 20, 0, 0 };
@@ -62,6 +71,7 @@ struct ld50_game : public g::core
 
 	virtual void update(float dt)
 	{
+
 		object("data/player-ship.yaml", {
 			{ "traits", {
 				{ "fuel", 100 },

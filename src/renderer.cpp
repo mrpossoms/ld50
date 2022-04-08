@@ -9,18 +9,34 @@ void ld50::renderer::draw_splash(ld50::state& state)
 
 }
 
-static void render_bodies(g::asset::store& assets, ld50::body& b, g::game::camera& cam)
+void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 {
-	auto& planet_shader = assets.shader("pos_uv_norm.vs+body.fs");
+	auto& planet_shader = assets.shader("pos_uv_norm.vs+normal_debug.fs");
 
-	assets.geo(b.model_name).using_shader(planet_shader)
+	auto itr = planet_meshes.find(b.model_name);
+	if (itr == planet_meshes.end())
+	{
+		float r = b.radius;
+		auto sphere = [&](const vec<3>& p) -> float { return r - p.magnitude(); };
+		auto gen = [](const g::game::sdf& sdf, const vec<3>& pos) -> g::gfx::vertex::pos_norm
+		{
+			return { pos, -pos.unit() };
+		};
+		vec<3> corners[] = {
+			{ -r,-r,-r },
+			{  r, r, r },
+		};
+		planet_meshes[b.model_name] = g::gfx::mesh_factory::from_sdf<g::gfx::vertex::pos_norm>(sphere, gen, corners);	
+	}
+
+	planet_meshes[b.model_name].using_shader(planet_shader)
 		.set_camera(cam)
 		["u_model"].mat4(mat4::I())
 		.draw<GL_TRIANGLES>();
 
 	for (auto& sat : b.satellites)
 	{
-		render_bodies(assets, sat, cam);
+		render_bodies(sat, cam);
 	}
 }
 
@@ -64,10 +80,10 @@ void ld50::renderer::draw_game(ld50::state& state)
 	}
 
 	{ // draw bodies
-		//for (auto& body : state.bodies)
-		//{
-		//	render_bodies(assets, body, state.my.camera);
-		//}
+		for (auto& body : state.bodies)
+		{
+			render_bodies(body, state.my.camera);
+		}
 	}
 
 	{ // draw players

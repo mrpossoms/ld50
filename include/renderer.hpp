@@ -19,8 +19,11 @@ private:
 	void draw_splash(ld50::state& state);
 	void draw_game(ld50::state& state);
 
+	void render_bodies(ld50::body& b, g::game::camera& cam);
+
 	g::gfx::texture white_noise_rgb;
 	g::gfx::mesh<g::gfx::vertex::pos_norm> sky_sphere;
+	std::unordered_map<std::string, g::gfx::mesh<g::gfx::vertex::pos_norm>> planet_meshes;
 	g::asset::store& assets;
 	std::unordered_map<std::string, g::game::object>& object_map;
 };
