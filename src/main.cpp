@@ -89,7 +89,7 @@ struct ld50_game : public g::core
 
 		// update the player's camera
 		auto& player_ship = state.my_player();
-		auto camera_orbit_target = player_ship.to_global(cam_pos) + player_ship.position;
+		auto camera_orbit_target = state.my.camera.orientation.rotate(cam_pos) + player_ship.position;
 		state.my.camera.position = state.my.camera.position.lerp(camera_orbit_target, dt * player_traits["cam_spring"].number);
 		
 
@@ -119,7 +119,9 @@ struct ld50_game : public g::core
 				auto dx = xpos - xlast;
 				auto dy = ypos - ylast;
 
-				auto d_o = quat<>::from_axis_angle({ 0, 1, 0 }, dx * dt * sensitivity) * quat<>::from_axis_angle({ 1, 0, 0 }, -dy * dt * sensitivity);
+				auto d_o = quat<>::from_axis_angle({ 0, 1, 0 }, -dx * dt * sensitivity) * quat<>::from_axis_angle({ 1, 0, 0 }, dy * dt * sensitivity);
+				if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_Q) == GLFW_PRESS) d_o = quat<>::from_axis_angle({ 0, 0, -1 }, -dt) * d_o;
+				if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_E) == GLFW_PRESS) d_o = quat<>::from_axis_angle({ 0, 0, -1 }, dt) * d_o;
 
 				if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 				{
@@ -128,7 +130,7 @@ struct ld50_game : public g::core
 				}
 				else
 				{
-					state.my.camera.orientation = d_o * state.my.camera.orientation;
+					state.my.camera.orientation = state.my.camera.orientation * d_o.inverse();
 				}
 
 				if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS)
@@ -138,8 +140,7 @@ struct ld50_game : public g::core
 			}
 		xlast = xpos; ylast = ypos;
 
-    if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_Q) == GLFW_PRESS) player_ship.orientation = quat<>::from_axis_angle({0, 0, -1}, -dt) * player_ship.orientation;
-    if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_E) == GLFW_PRESS) player_ship.orientation = quat<>::from_axis_angle({0, 0, -1}, dt) * player_ship.orientation;
+
 
 		player_ship.dyn_apply_global_force(player_ship.position, ld50::acceleration_at_point(state, player_ship.position, state.time));
 		player_ship.dyn_step(dt);
@@ -170,6 +171,8 @@ int main (int argc, const char* argv[])
 
 	opts.name = "ld50";
 	opts.gfx.fullscreen = false;
+	opts.gfx.width = 1024;
+	opts.gfx.height = 768;
 
 #ifdef __EMSCRIPTEN__
 	auto monitor = glfwGetPrimaryMonitor();

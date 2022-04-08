@@ -38,8 +38,8 @@ static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& 
 		auto x_1 = x + x_prime * dt;
 
 		auto a = 1 - ((t - state.time) / 100.f);
-		g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).point(x);
-		//g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).ray(x, x_1 - x);
+		//g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).point(x);
+		g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).ray(x, x_1 - x);
 
 		x = x_1;
 	}
