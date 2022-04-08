@@ -21,6 +21,12 @@ struct body : public dyn::particle
 	std::vector<body> satellites;
 	std::string model_name;
 
+	float e; //< eccentricity
+	float a; //< semi-major axis
+	float i; //< inclination
+	float W; //< longitude of the ascending node
+	float w; //< argument of periapsis
+
 	vec<3> position_at(float t) const
 	{
 		return {};
