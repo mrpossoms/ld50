@@ -120,8 +120,13 @@ struct ld50_game : public g::core
 				auto dy = ypos - ylast;
 
 				auto d_o = quat<>::from_axis_angle({ 0, 1, 0 }, -dx * dt * sensitivity) * quat<>::from_axis_angle({ 1, 0, 0 }, dy * dt * sensitivity);
-				if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_Q) == GLFW_PRESS) d_o = quat<>::from_axis_angle({ 0, 0, -1 }, -dt) * d_o;
-				if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_E) == GLFW_PRESS) d_o = quat<>::from_axis_angle({ 0, 0, -1 }, dt) * d_o;
+
+				auto Q = glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_Q) == GLFW_PRESS;
+				auto E = glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_E) == GLFW_PRESS;
+
+				if (Q && E) { player_ship.dyn_apply_global_force(player_ship.position, -player_ship.velocity); }
+				else if (Q) { d_o = quat<>::from_axis_angle({ 0, 0, -1 }, -dt) * d_o; }
+				else if (E) { d_o = quat<>::from_axis_angle({ 0, 0, -1 }, dt) * d_o; }
 
 				if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 				{
