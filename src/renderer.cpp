@@ -24,6 +24,27 @@ static void render_bodies(g::asset::store& assets, ld50::body& b, g::game::camer
 	}
 }
 
+static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& dx0, const vec<3>& base_color)
+{
+	glPointSize(3);
+
+	auto x = x0;
+	auto x_prime = dx0;
+	auto dt = 0.1f;
+	for (float t = state.time; t < state.time + 100; t += dt)
+	{
+		auto acc = acceleration_at_point(state, x, t);
+		x_prime += acc * dt;
+		auto x_1 = x + x_prime * dt;
+
+		auto a = 1 - ((t - state.time) / 100.f);
+		g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).point(x);
+		//g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).ray(x, x_1 - x);
+
+		x = x_1;
+	}
+}
+
 void ld50::renderer::draw_game(ld50::state& state)
 {
 	auto rotation_only = state.my.camera.view();
@@ -69,20 +90,9 @@ void ld50::renderer::draw_game(ld50::state& state)
 		glEnable(GL_CULL_FACE);
 	}
 
-	auto x = state.my_player().position;
-	auto x_prime = state.my_player().velocity;
-	auto dt = 0.1f;
-	for (float t = state.time; t < state.time + 100; t += dt)
-	{
-		auto acc = acceleration_at_point(state, x, t);
-		x_prime += acc * dt;
-		auto x_1 = x + x_prime * dt;
-
-		auto a = 1 - ((t - state.time) / 100.f);
-		g::gfx::debug::print{ &state.my.camera }.color({ x_prime.magnitude() * 0.1, 0.1, 0.1, a }).ray(x, x_1 - x);
-
-		x = x_1;
-	}
+	auto& player = state.my_player(); 
+	draw_trajectory(state, player.position, player.velocity, {1, 0, 0});
+	draw_trajectory(state, player.position, player.velocity + player.orientation.inverse().rotate({0, 0, -10}), {1, 1, 1});
 
 	g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(vec<3>{}, vec<3>{ 1000, 0, 0 });
 	g::gfx::debug::print{ &state.my.camera }.color({ 0, 1, 0, 1 }).ray(vec<3>{}, vec<3>{ 0, 1000, 0 });

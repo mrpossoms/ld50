@@ -3,6 +3,14 @@
 #include "renderer.hpp"
 #include "mechanics.hpp"
 
+float SCROLL_D_Y = 0;
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	SCROLL_D_Y = yoffset;
+}
+
+
 struct ld50_game : public g::core
 {
 	g::asset::store assets;
@@ -46,6 +54,7 @@ struct ld50_game : public g::core
 		state.current = ld50::game_state::game;
 
 		glfwSetInputMode(g::gfx::GLFW_WIN, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		glfwSetScrollCallback(g::gfx::GLFW_WIN, scroll_callback);
 
 
 		return true;
@@ -72,16 +81,17 @@ struct ld50_game : public g::core
 			}},
 		});
 
+		state.my.zoom += SCROLL_D_Y * 0.1f;
+		SCROLL_D_Y = 0;
+
 		auto& player_traits = object("data/player-ship.yaml").traits();
-		vec<3> cam_pos = { player_traits["cam_x"].number, player_traits["cam_y"].number, player_traits["cam_z"].number };
+		auto cam_pos = vec<3>{ player_traits["cam_x"].number, player_traits["cam_y"].number, player_traits["cam_z"].number } * state.my.zoom;
 
 		// update the player's camera
 		auto& player_ship = state.my_player();
 		auto camera_orbit_target = player_ship.to_global(cam_pos) + player_ship.position;
 		state.my.camera.position = state.my.camera.position.lerp(camera_orbit_target, dt * player_traits["cam_spring"].number);
-		state.my.camera.orientation = player_ship.orientation.inverse();
-
-
+		
 
 		static double xlast, ylast;
 		float sensitivity = 0.5f;
@@ -109,10 +119,16 @@ struct ld50_game : public g::core
 				auto dx = xpos - xlast;
 				auto dy = ypos - ylast;
 
+				auto d_o = quat<>::from_axis_angle({ 0, 1, 0 }, dx * dt * sensitivity) * quat<>::from_axis_angle({ 1, 0, 0 }, -dy * dt * sensitivity);
+
 				if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 				{
-					auto d_o = quat<>::from_axis_angle({ 0, 1, 0 }, dx * dt * sensitivity) * quat<>::from_axis_angle({ 1, 0, 0 }, -dy * dt * sensitivity);
 					player_ship.orientation = d_o * player_ship.orientation;
+					state.my.camera.orientation = player_ship.orientation.inverse();
+				}
+				else
+				{
+					state.my.camera.orientation = d_o * state.my.camera.orientation;
 				}
 
 				if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS)
@@ -121,6 +137,9 @@ struct ld50_game : public g::core
 				}
 			}
 		xlast = xpos; ylast = ypos;
+
+    if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_Q) == GLFW_PRESS) player_ship.orientation = quat<>::from_axis_angle({0, 0, -1}, -dt) * player_ship.orientation;
+    if (glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_E) == GLFW_PRESS) player_ship.orientation = quat<>::from_axis_angle({0, 0, -1}, dt) * player_ship.orientation;
 
 		player_ship.dyn_apply_global_force(player_ship.position, ld50::acceleration_at_point(state, player_ship.position, state.time));
 		player_ship.dyn_step(dt);

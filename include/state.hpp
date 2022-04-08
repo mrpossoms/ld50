@@ -62,7 +62,7 @@ struct state
 	struct {
 		unsigned player_index = 0;
 		game::camera_perspective camera;
-
+		float zoom = 1;
 	} my;
 
 	struct {
