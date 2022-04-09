@@ -38,6 +38,14 @@ struct kepler
         };// .transpose();
 	}
 
+	inline vec<3> position_at(float t)
+	{
+		auto µ = 1.f; // gravitational param
+		auto n = sqrtf(µ/pow(a,3));
+		auto M = n * t;
+		
+	};
+
 	inline vec<3> velocity()
 	{
 		auto µ = 1.f; // gravitational param
