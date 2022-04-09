@@ -31,7 +31,7 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 
 	planet_meshes[b.model_name].using_shader(planet_shader)
 		.set_camera(cam)
-		["u_model"].mat4(mat4::I())
+		["u_model"].mat4(mat4::translation(b.position))
 		.draw<GL_TRIANGLES>();
 
 	for (auto& sat : b.satellites)

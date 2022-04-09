@@ -17,33 +17,65 @@ enum class game_state
 
 struct kepler
 {
-	float e; //< eccentricity
-	float a; //< semi-major axis
-	float i; //< inclination
-	float Ω; //< longitude of the ascending node
-	float ω; //< argument of periapsis
-	float ν; //< true anomoly
+	float e = 0; //< eccentricity
+	float a = 1; //< semi-major axis
+	float i = 0; //< inclination
+	float O = 0; //< longitude of the ascending node
+	float o = 0; //< argument of periapsis
+	float ν = 0; //< true anomoly
+
+	float E = M_PI;
+	float T = 0;
 
 	inline mat<3, 3> perifocal_to_geocentric()
 	{
-        const auto c_Ω = cos(Ω), s_Ω = sin(Ω);
-        const auto c_ω = cos(ω), s_ω = sin(ω);
+        const auto c_O = cos(O), s_O = sin(O);
+        const auto c_o = cos(o), s_o = sin(o);
         const auto c_i = cos(i), s_i = sin(i);
 
         // transformation matrix between perifocal coords to geocentric
         return {
-            { c_Ω * c_ω - s_Ω * s_ω * c_i, -c_Ω * s_ω - s_Ω * c_ω * c_i,  s_Ω * s_i, },
-            { s_Ω * c_ω + c_Ω * s_ω * c_i, -s_Ω * s_ω + c_Ω * c_ω * c_i, -c_Ω * s_i, },
-            { s_ω * s_i,                   c_ω * s_i,                     c_i      , },
+            { c_O * c_o - s_O * s_o * c_i, -c_O * s_o - s_O * c_o * c_i,  s_O * s_i, },
+            { s_O * c_o + c_O * s_o * c_i, -s_O * s_o + c_O * c_o * c_i, -c_O * s_i, },
+            { s_o * s_i,                   c_o * s_i,                     c_i      , },
         };// .transpose();
 	}
 
-	inline vec<3> position_at(float t)
+	inline vec<3> position_at(float mass, float t)
 	{
-		auto µ = 1.f; // gravitational param
-		auto n = sqrtf(µ/pow(a,3));
+		auto mu = mass * 1.f; // gravitational param
+		auto n = sqrtf(mu/pow(a,3));
 		auto M = n * t;
-		
+
+		// M = E - e sin(E)
+		//
+		auto k_fn = [this](float E) -> float { return E - e * sin(E); };
+		for (; fabsf(k_fn(E) - M) > 0.001;)
+		{
+			const auto h = 0.01f;
+
+			auto dk = (k_fn(E + h) - k_fn(E)) / h;
+			auto r = k_fn(E) - M;
+			E += dk * h;
+
+			std::cerr << r << " " << E << std::endl;
+		}
+
+		auto ta_fn = [this](float T) -> float { return (1 - e) * powf(tanf(T/2), 2.f); };
+		auto E_ta = (1 + e) * powf(tanf(E / 2), 2.f);
+		for (; fabsf(ta_fn(T) - E_ta) > 0.001;)
+		{
+			const auto h = 0.5f;
+
+			auto r = ta_fn(T) - E_ta;
+			T -= r * h;
+			//std::cerr << r << " " << E << std::endl;
+		}
+		//std::cerr << E << std::endl;
+
+		auto r = a * (1 - e * cos(E));
+
+		return quat<>::from_axis_angle({ 0, 1, 0 }, T).rotate({ 0, 0, r });
 	};
 
 	inline vec<3> velocity()
@@ -71,9 +103,11 @@ struct body : public dyn::particle
 	std::vector<body> satellites;
 	std::string model_name;
 
-	vec<3> position_at(float t) const
+	kepler orbit;
+
+	vec<3> position_at(float t)
 	{
-		return {};
+		return orbit.position_at(mass, t);
 	}
 };
 

@@ -65,6 +65,15 @@ struct ld50_game : public g::core
 		glfwSetInputMode(g::gfx::GLFW_WIN, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		glfwSetScrollCallback(g::gfx::GLFW_WIN, scroll_callback);
 
+		ld50::kepler k;
+		k.e = 0.5;
+
+		for (float t = 10; t < 20; t += 1)
+		{
+			k.position_at(100, t);
+		}
+
+		//k.position_at(100, 1.1);
 
 		return true;
 	}
@@ -160,6 +169,10 @@ struct ld50_game : public g::core
 		player_ship.dyn_apply_global_force(player_ship.position, ld50::acceleration_at_point(state, player_ship.position, state.time));
 		player_ship.dyn_step(dt);
 
+		for (auto& b : state.bodies)
+		{
+			ld50::update_bodies(state, b, {});
+		}
 
 		renderer->render(state);
 
