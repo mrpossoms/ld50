@@ -17,7 +17,7 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 	if (itr == planet_meshes.end())
 	{
 		float r = b.radius;
-		auto sphere = [&](const vec<3>& p) -> float { return r - p.magnitude(); };
+		auto sphere = [&](const vec<3>& p) -> float { return p.magnitude() - r; };
 		auto gen = [](const g::game::sdf& sdf, const vec<3>& pos) -> g::gfx::vertex::pos_norm
 		{
 			return { pos, -pos.unit() };

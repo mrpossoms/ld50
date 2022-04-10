@@ -3,6 +3,9 @@
 #include "renderer.hpp"
 #include "mechanics.hpp"
 
+#undef near
+#undef far
+
 float SCROLL_D_Y = 0;
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -42,23 +45,25 @@ struct ld50_game : public g::core
 		renderer = std::make_unique<ld50::renderer>(assets, object_map);
 
 
-		ld50::body star;
-		star.mass = 100;
-		star.radius = 10;
-		
-		ld50::body planet;
-		planet.model_name = "planet";
-		planet.orbit.a = 200;
-		planet.mass = 100;
-		planet.radius = 2;
+		//ld50::body star;
+		//star.mass = 100;
+		//star.radius = 10;
+		//
+		//ld50::body planet;
+		//planet.model_name = "planet";
+		//planet.orbit.a = 200;
+		//planet.mass = 100;
+		//planet.radius = 2;
+		//star.satellites.push_back(planet);
+		//state.bodies.push_back(star);
 
+		ld50::populate_solar_system(state, 5, 0);
 
-		star.satellites.push_back(planet);
-
-		state.bodies.push_back(star);
+		state.my.camera.near = 1.f;
+		state.my.camera.far = 10000.f;
 
 		ld50::player p;
-		p.position = { 20, 0, 0 };
+		p.position = { state.bodies[0].radius * 2, 0, 0 };
 		p.linear_momentum = { 0, 0, -10 };
 		state.players.push_back(p);
 

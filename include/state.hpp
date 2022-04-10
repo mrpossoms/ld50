@@ -18,7 +18,7 @@ enum class game_state
 struct kepler
 {
 	float e = 0; //< eccentricity
-	float a = 1; //< semi-major axis
+	float a = 0; //< semi-major axis
 	float i = 0; //< inclination
 	float O = 0; //< longitude of the ascending node
 	float o = 0; //< argument of periapsis
@@ -79,7 +79,7 @@ struct kepler
 
 		auto r = a * (1 - e * cos(E));
 
-		return quat<>::from_axis_angle({ 0, 1, 0 }, T).rotate({ 0, 0, r });
+		return quat<>::from_axis_angle({ 0, 1, 0 }, T + O).rotate({ 0, 0, r });
 	};
 
 	// inline vec<3> velocity()
@@ -108,6 +108,8 @@ struct body : public dyn::particle
 	std::string model_name;
 
 	kepler orbit;
+
+	body(float r, float m) : radius(r), mass(m) {}
 
 	vec<3> position_at(float t)
 	{
