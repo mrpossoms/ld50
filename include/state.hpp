@@ -50,50 +50,54 @@ struct kepler
 		// M = E - e sin(E)
 		//
 		auto k_fn = [this](float E) -> float { return E - e * sin(E); };
-		for (; fabsf(k_fn(E) - M) > 0.001;)
-		{
-			const auto h = 0.01f;
-
-			auto dk = (k_fn(E + h) - k_fn(E)) / h;
-			auto r = k_fn(E) - M;
-			E += dk * h;
-
-			std::cerr << r << " " << E << std::endl;
-		}
-
-		auto ta_fn = [this](float T) -> float { return (1 - e) * powf(tanf(T/2), 2.f); };
-		auto E_ta = (1 + e) * powf(tanf(E / 2), 2.f);
-		for (; fabsf(ta_fn(T) - E_ta) > 0.001;)
+		for (; fabsf(k_fn(E) - M) > 0.005;)
 		{
 			const auto h = 0.5f;
 
-			auto r = ta_fn(T) - E_ta;
-			T -= r * h;
-			//std::cerr << r << " " << E << std::endl;
+			//auto dk = (k_fn(E + h) - k_fn(E)) / h;
+			auto r = k_fn(E) - M;
+			E -= r * h;
+
+			// std::cerr << r << " " << E << std::endl;
 		}
+
+		// auto ta_fn = [this](float T) -> float { return (1 - e) * powf(tanf(T/2), 2.f); };
+		// auto E_ta = (1 + e) * powf(tanf(E / 2), 2.f);
+		// for (; fabsf(ta_fn(T) - E_ta) > 0.001;)
+		// {
+		// 	const auto h = 0.5f;
+
+		// 	auto r = ta_fn(T) - E_ta;
+		// 	T -= r * h;
+		// 	std::cerr << r << " " << E << std::endl;
+		// }
 		//std::cerr << E << std::endl;
+		auto e_0 = (1 - e);
+		auto e_1 = (1 + e);
+
+		T = 2 * atan(sqrtf(e_1 * powf(tan(E/2.f), 2.0) / e_0));
 
 		auto r = a * (1 - e * cos(E));
 
 		return quat<>::from_axis_angle({ 0, 1, 0 }, T).rotate({ 0, 0, r });
 	};
 
-	inline vec<3> velocity()
-	{
-		auto µ = 1.f; // gravitational param
-		const auto v_a = vec<3>{-sin(ν), e + cos(ν), 0.f} * sqrtf(µ / a);
+	// inline vec<3> velocity()
+	// {
+	// 	auto µ = 1.f; // gravitational param
+	// 	const auto v_a = vec<3>{-sin(ν), e + cos(ν), 0.f} * sqrtf(µ / a);
 
-		return perifocal_to_geocentric() * v_a;
-	}
+	// 	return perifocal_to_geocentric() * v_a;
+	// }
 
-	inline vec<3> position()
-	{
-		auto µ = 1.f; // gravitational param
-		const auto r_mag = a / (1.f + e * cos(ν));
-		const auto r_p = vec<3>{r_mag * cos(ν), r_mag * sin(ν), 0};
+	// inline vec<3> position()
+	// {
+	// 	auto µ = 1.f; // gravitational param
+	// 	const auto r_mag = a / (1.f + e * cos(ν));
+	// 	const auto r_p = vec<3>{r_mag * cos(ν), r_mag * sin(ν), 0};
 
-		return perifocal_to_geocentric() * r_p;
-	}
+	// 	return perifocal_to_geocentric() * r_p;
+	// }
 };
 
 struct body : public dyn::particle

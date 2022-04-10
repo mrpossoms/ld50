@@ -47,6 +47,8 @@ struct ld50_game : public g::core
 		star.radius = 5;
 		
 		ld50::body planet;
+		planet.model_name = "planet";
+		planet.orbit.a = 20;
 		planet.mass = 10;
 		planet.radius = 2;
 
@@ -65,13 +67,14 @@ struct ld50_game : public g::core
 		glfwSetInputMode(g::gfx::GLFW_WIN, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		glfwSetScrollCallback(g::gfx::GLFW_WIN, scroll_callback);
 
-		ld50::kepler k;
-		k.e = 0.5;
+		// ld50::kepler k;
+		// k.a = 20;
+		// k.e = 0.5;
 
-		for (float t = 10; t < 20; t += 1)
-		{
-			k.position_at(100, t);
-		}
+		// for (float t = 10; t < 20; t += 1)
+		// {
+		// 	k.position_at(100, t);
+		// }
 
 		//k.position_at(100, 1.1);
 
@@ -164,15 +167,13 @@ struct ld50_game : public g::core
 			}
 		xlast = xpos; ylast = ypos;
 
-
-
-		player_ship.dyn_apply_global_force(player_ship.position, ld50::acceleration_at_point(state, player_ship.position, state.time));
-		player_ship.dyn_step(dt);
-
-		for (auto& b : state.bodies)
+		for (auto& b : state.bodies[0].satellites)
 		{
 			ld50::update_bodies(state, b, {});
 		}
+
+		player_ship.dyn_apply_global_force(player_ship.position, ld50::acceleration_at_point(state, player_ship.position, state.time));
+		player_ship.dyn_step(dt);
 
 		renderer->render(state);
 
