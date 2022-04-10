@@ -44,12 +44,12 @@ struct ld50_game : public g::core
 
 		ld50::body star;
 		star.mass = 100;
-		star.radius = 5;
+		star.radius = 10;
 		
 		ld50::body planet;
 		planet.model_name = "planet";
-		planet.orbit.a = 20;
-		planet.mass = 10;
+		planet.orbit.a = 200;
+		planet.mass = 100;
 		planet.radius = 2;
 
 

@@ -50,7 +50,7 @@ struct kepler
 		// M = E - e sin(E)
 		//
 		auto k_fn = [this](float E) -> float { return E - e * sin(E); };
-		for (; fabsf(k_fn(E) - M) > 0.005;)
+		for (; fabsf(k_fn(E) - M) > 0.0001;)
 		{
 			const auto h = 0.5f;
 
@@ -143,6 +143,26 @@ struct state
 	float time = 0;
 	std::vector<body> bodies;
 	std::vector<player> players;
+	
+	void for_each_body(std::function<bool(ld50::body&)> callback, ld50::body* current=nullptr)
+	{
+		if (current)
+		{
+			if (!callback(*current)) { return; }
+
+			for (auto& b : current->satellites)
+			{
+				for_each_body(callback, &b);
+			}
+		}
+		else
+		{
+			for (auto& b : bodies)
+			{
+				for_each_body(callback, &b);
+			}
+		}
+	}
 
 	/**
 	 * Convenience struct for local player

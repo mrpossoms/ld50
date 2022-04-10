@@ -40,20 +40,35 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 	}
 }
 
-static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& dx0, const vec<3>& base_color)
+static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& dx0, const vec<3>& base_color, float prediction_time)
 {
 	glPointSize(3);
 
 	auto x = x0;
 	auto x_prime = dx0;
 	auto dt = 0.1f;
-	for (float t = state.time; t < state.time + 100; t += dt)
+	for (float t = state.time; t < state.time + prediction_time; t += dt)
 	{
 		auto acc = acceleration_at_point(state, x, t);
 		x_prime += acc * dt;
 		auto x_1 = x + x_prime * dt;
 
-		auto a = 1 - ((t - state.time) / 100.f);
+		bool collides = false;
+
+		state.for_each_body([&](ld50::body& b) -> bool {
+			auto r = x_1 - b.position;
+			if (r.dot(r) < (b.radius * b.radius))
+			{
+				collides = true;
+				return false;
+			}
+
+			return true;
+		});
+
+		if (collides) { break; }
+
+		auto a = 1 - ((t - state.time) / prediction_time);
 		//g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).point(x);
 		g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).ray(x, x_1 - x);
 
@@ -107,8 +122,8 @@ void ld50::renderer::draw_game(ld50::state& state)
 	}
 
 	auto& player = state.my_player(); 
-	draw_trajectory(state, player.position, player.velocity, {1, 0, 0});
-	draw_trajectory(state, player.position, player.velocity + player.orientation.inverse().rotate({0, 0, -10}), {1, 1, 1});
+	draw_trajectory(state, player.position, player.velocity, {1, 0, 0}, 100);
+	draw_trajectory(state, player.position, player.velocity + player.orientation.inverse().rotate({0, 0, -10}), {1, 1, 1}, 10);
 
 	g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(vec<3>{}, vec<3>{ 1000, 0, 0 });
 	g::gfx::debug::print{ &state.my.camera }.color({ 0, 1, 0, 1 }).ray(vec<3>{}, vec<3>{ 0, 1000, 0 });
