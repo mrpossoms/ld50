@@ -57,7 +57,7 @@ struct ld50_game : public g::core
 		//star.satellites.push_back(planet);
 		//state.bodies.push_back(star);
 
-		ld50::populate_solar_system(state, 5, 0);
+		ld50::populate_solar_system(state, 2, 0);
 
 		state.my.camera.near = 1.f;
 		state.my.camera.far = 10000.f;
@@ -172,10 +172,9 @@ struct ld50_game : public g::core
 			}
 		xlast = xpos; ylast = ypos;
 
-		for (auto& b : state.bodies[0].satellites)
-		{
-			ld50::update_bodies(state, b, {});
-		}
+
+		ld50::update_body_velocities(state);
+		ld50::update_body_positions(state, dt);
 
 		player_ship.dyn_apply_global_force(player_ship.position, ld50::acceleration_at_point(state, player_ship.position, state.time));
 		player_ship.dyn_step(dt);

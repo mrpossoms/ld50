@@ -7,7 +7,7 @@ vec<3> ld50::acceleration_at_point(const ld50::state& state, const vec<3>& pos, 
 	{
 		auto G = 1;
 		auto r = b.position - pos;
-		vec<3> acc = r * G * b.mass / r.dot(r);
+		vec<3> acc = r * G * b.mass / std::max(0.001f, r.dot(r));
 
 		for (auto& b : b.satellites)
 		{
@@ -47,6 +47,9 @@ static void populate(ld50::body& parent, unsigned bodies, std::default_random_en
 		body.orbit.O = 2 * M_PI * stanard_dist(generator);
 		body.model_name = std::to_string(r);
 
+		body.position = body.orbit.position(body.mass) + parent.position;
+		body.velocity = body.orbit.velocity(body.mass) + parent.velocity;
+
 		parent.satellites.push_back(body);
 		bodies -= 1;
 
@@ -70,12 +73,19 @@ void ld50::populate_solar_system(ld50::state& state, unsigned bodies, unsigned s
 	populate(state.bodies[0], bodies - 1, generator, kStarRadius);
 }
 
-void ld50::update_bodies(ld50::state& state, ld50::body& b, const vec<3>& parent_pos)
+void ld50::update_body_velocities(ld50::state& state)
 {
-	b.position = parent_pos + b.position_at(state.time);
+	state.for_each_body([&](ld50::body& b) -> bool {
+		auto acc = ld50::acceleration_at_point(state, b.position, state.time);
+		b.velocity += acc;
+		return true;
+	});
+}
 
-	for (auto& s : b.satellites)
-	{
-		ld50::update_bodies(state, s, b.position);
-	}
+void ld50::update_body_positions(ld50::state& state, float dt)
+{
+	state.for_each_body([&](ld50::body& b) {
+		b.position += b.velocity * dt;
+		return true;
+	});
 }
