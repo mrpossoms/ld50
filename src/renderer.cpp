@@ -33,6 +33,7 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 		.set_camera(cam)
 		["u_model"].mat4(mat4::translation(b.position))
 		.draw<GL_TRIANGLES>();
+	//draw_trajectory(state, )
 
 	for (auto& sat : b.satellites)
 	{
