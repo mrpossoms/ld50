@@ -6,7 +6,9 @@ using namespace xmath;
 namespace ld50
 {
 
-vec<3> acceleration_at_point(const ld50::state& state, const vec<3>& pos, float t);
+vec<3> force_at_point(const ld50::state& state, const vec<3>& pos, float t);
+
+void handle_controls(ld50::state& state, float dt);
 
 void update_body_velocities(ld50::state& state, float dt);
 

@@ -50,7 +50,7 @@ static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& 
 	auto dt = 0.1f;
 	for (float t = state.time; t < state.time + prediction_time; t += dt)
 	{
-		auto acc = acceleration_at_point(state, x, t);
+		auto acc = force_at_point(state, x, t);
 		x_prime += acc * dt;
 		auto x_1 = x + x_prime * dt;
 
@@ -108,7 +108,7 @@ void ld50::renderer::draw_game(ld50::state& state)
 		glDisable(GL_CULL_FACE);
 		for (auto& player : state.players)
 		{
-			object_map["data/player-ship.yaml"].geometry("hull").using_shader(player_shader)
+			object_map["player-ship.yaml"].geometry("hull").using_shader(player_shader)
 				.set_camera(state.my.camera)
 				["u_model"].mat4(player.orientation.to_matrix() * mat<4, 4>::translation(player.position))
 				.draw<GL_TRIANGLES>();

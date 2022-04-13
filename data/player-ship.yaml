@@ -1,11 +1,11 @@
-geometry:
-  hull: player_1.hull.obj
+traits:
+  fuel: 100
+  cam_spring: 10
+  cam_y: 10
+  thrust_per_fuel: 1
+  cam_x: 0
+  cam_z: 20
 textures:
   diffuse: player.diffuse.png
-traits:
-  cam_y: 0
-  cam_x: 0
-  thrust_per_fuel: 1
-  cam_z: 20
-  cam_spring: 10
-  fuel: 100
+geometry:
+  hull: player_1.hull.obj
