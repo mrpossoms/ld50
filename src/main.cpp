@@ -99,6 +99,7 @@ struct ld50_game : public g::core
 				{ "cam_x", 0},
 				{ "cam_y", 20},
 				{ "cam_z", 20},
+				{ "gravity_thrust_mult", 10 },
 				{ "cam_spring", 10 },
 			}},
 			
@@ -125,7 +126,7 @@ struct ld50_game : public g::core
 		auto camera_orbit_target = state.my.camera.orientation.rotate(cam_pos) + player_ship.position;
 		state.my.camera.position = state.my.camera.position.lerp(camera_orbit_target, dt * std::get<float>(player_traits["cam_spring"]));
 		
-		ld50::handle_controls(state, dt);
+		ld50::handle_controls(state, object_map, dt);
 
 
 		// ld50::update_body_velocities(state, dt);

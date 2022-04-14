@@ -5,6 +5,7 @@ traits:
   thrust_per_fuel: 1
   cam_x: 0
   cam_z: 20
+  gravity_thrust_mult: 10
 textures:
   diffuse: player.diffuse.png
 geometry:

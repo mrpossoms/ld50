@@ -1,4 +1,5 @@
 #pragma once
+#include <g.h>
 #include "state.hpp"
 
 using namespace xmath;
@@ -8,7 +9,7 @@ namespace ld50
 
 vec<3> force_at_point(const ld50::state& state, const vec<3>& pos, float t);
 
-void handle_controls(ld50::state& state, float dt);
+void handle_controls(ld50::state& state, std::unordered_map<std::string, g::game::object>& objects, float dt);
 
 void update_body_velocities(ld50::state& state, float dt);
 

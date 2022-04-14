@@ -2,6 +2,7 @@
 
 #include <g.h>
 #include <random>
+#include <variant>
 
 vec<3> ld50::force_at_point(const ld50::state& state, const vec<3>& pos, float t)
 {
@@ -29,7 +30,7 @@ vec<3> ld50::force_at_point(const ld50::state& state, const vec<3>& pos, float t
 	return a;
 }
 
-void ld50::handle_controls(ld50::state& state, float dt)
+void ld50::handle_controls(ld50::state& state, std::unordered_map<std::string, g::game::object>& objects, float dt)
 {
 	static double xlast, ylast;
 	float sensitivity = 0.5f;
@@ -83,7 +84,9 @@ void ld50::handle_controls(ld50::state& state, float dt)
 
 			if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 			{
-				player_ship.dyn_apply_local_force({ 0, 0, 0 }, { 0, 0, -10 });
+				auto f = ld50::force_at_point(state, player_ship.position, state.time);
+
+				player_ship.dyn_apply_local_force({ 0, 0, 0 }, { 0, 0, -10 * std::get<float>(objects["player-ship.yaml"].traits()["gravity_thrust_mult"]) });
 			}
 		}
 	}
