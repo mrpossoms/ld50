@@ -7,6 +7,8 @@ using namespace xmath;
 namespace ld50
 {
 
+float nearest_body_dist(const ld50::state& state, const vec<3>& pos);
+
 vec<3> force_at_point(const ld50::state& state, const vec<3>& pos, float t);
 
 void handle_controls(ld50::state& state, std::unordered_map<std::string, g::game::object>& objects, float dt);

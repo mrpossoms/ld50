@@ -4,6 +4,20 @@
 #include <random>
 #include <variant>
 
+//float nearest_body_dist(ld50::state& state, const vec<3>& pos)
+//{
+//	float least_d2 = INFINITY;
+//	state.for_each_body([&](ld50::body& b) {
+//		auto d = b.position - pos;
+//		auto d2 = d.dot(d);
+//
+//		least_d2 = std::min<float>(least_d2, d2);
+//	});
+//
+//	return sqrtf(least_d2);
+//}
+
+
 vec<3> ld50::force_at_point(const ld50::state& state, const vec<3>& pos, float t)
 {
 	std::function<vec<3>(const ld50::body&, vec<3>)> net_acc = [&](const ld50::body& b, vec<3> pos) -> vec<3> 
@@ -53,6 +67,9 @@ void ld50::handle_controls(ld50::state& state, std::unordered_map<std::string, g
 		glfwSetInputMode(g::gfx::GLFW_WIN, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
+	auto f = ld50::force_at_point(state, player_ship.position, state.time);
+	auto thrust = f.magnitude() * std::get<float>(objects["player-ship.yaml"].traits()["gravity_thrust_mult"]);
+
 	if (glfwGetInputMode(g::gfx::GLFW_WIN, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
 	{
 		if (xlast != 0 || ylast != 0)
@@ -67,7 +84,7 @@ void ld50::handle_controls(ld50::state& state, std::unordered_map<std::string, g
 
 			if (Q && E) 
 			{
-				player_ship.dyn_apply_global_force(player_ship.position, -player_ship.velocity); 
+				player_ship.dyn_apply_global_force(player_ship.position, -player_ship.velocity.unit() * thrust); 
 			}
 			else if (Q) { d_o = quat<>::from_axis_angle({ 0, 0, -1 }, -dt) * d_o; }
 			else if (E) { d_o = quat<>::from_axis_angle({ 0, 0, -1 }, dt) * d_o; }
@@ -84,9 +101,7 @@ void ld50::handle_controls(ld50::state& state, std::unordered_map<std::string, g
 
 			if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 			{
-				auto f = ld50::force_at_point(state, player_ship.position, state.time);
-
-				player_ship.dyn_apply_local_force({ 0, 0, 0 }, { 0, 0, -10 * std::get<float>(objects["player-ship.yaml"].traits()["gravity_thrust_mult"]) });
+				player_ship.dyn_apply_local_force({ 0, 0, 0 }, { 0, 0, -thrust });
 			}
 		}
 	}

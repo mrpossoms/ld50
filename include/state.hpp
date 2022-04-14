@@ -128,7 +128,7 @@ struct state
 	std::vector<body> bodies;
 	std::vector<player> players;
 	
-	void for_each_body(std::function<bool(ld50::body&)> callback, ld50::body* current=nullptr)
+	void for_each_body(std::function<bool(ld50::body&)> callback, ld50::body* current=nullptr) 
 	{
 		if (current)
 		{

@@ -122,18 +122,21 @@ struct ld50_game : public g::core
 		auto cam_pos = vec<3>{ cam_x, cam_y, cam_z } * state.my.zoom;
 
 		// update the player's camera
-		auto& player_ship = state.my_player();
-		auto camera_orbit_target = state.my.camera.orientation.rotate(cam_pos) + player_ship.position;
+		auto& player = state.my_player();
+		auto camera_orbit_target = state.my.camera.orientation.rotate(cam_pos) + player.position;
 		state.my.camera.position = state.my.camera.position.lerp(camera_orbit_target, dt * std::get<float>(player_traits["cam_spring"]));
-		
+
 		ld50::handle_controls(state, object_map, dt);
 
+		auto f = ld50::force_at_point(state, player.position, state.time);
+		dt /= f.magnitude();
+		dt = std::min<float>(dt, 0.5f);
 
 		// ld50::update_body_velocities(state, dt);
 		ld50::update_body_positions(state, state.bodies[0], {});
 
-		player_ship.dyn_apply_global_force(player_ship.position, ld50::force_at_point(state, player_ship.position, state.time));
-		player_ship.dyn_step(dt);
+		player.dyn_apply_global_force(player.position, ld50::force_at_point(state, player.position, state.time));
+		player.dyn_step(dt);
 
 		renderer->render(state);
 

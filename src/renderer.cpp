@@ -124,7 +124,10 @@ void ld50::renderer::draw_game(ld50::state& state)
 
 	auto& player = state.my_player(); 
 	draw_trajectory(state, player.position, player.velocity, {1, 0, 0}, 100);
-	draw_trajectory(state, player.position, player.velocity + player.orientation.inverse().rotate({0, 0, -10}), {1, 1, 1}, 10);
+
+	auto f = ld50::force_at_point(state, player.position, state.time);
+	auto thrust = f.magnitude() * std::get<float>(object_map["player-ship.yaml"].traits()["gravity_thrust_mult"]);
+	draw_trajectory(state, player.position, player.velocity + player.orientation.inverse().rotate({0, 0, -thrust }), {1, 1, 1}, 10);
 
 	g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(vec<3>{}, vec<3>{ 1000, 0, 0 });
 	g::gfx::debug::print{ &state.my.camera }.color({ 0, 1, 0, 1 }).ray(vec<3>{}, vec<3>{ 0, 1000, 0 });
