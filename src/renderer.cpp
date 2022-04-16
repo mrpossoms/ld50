@@ -82,7 +82,8 @@ void ld50::renderer::draw_game(ld50::state& state)
 	auto rotation_only = state.my.camera.view();
 	rotation_only[3] = { 0, 0, 0, 1 };
 
-
+	auto shake = ld50::random_vec(state.generator) * state.my_player().current_thrust * std::get<float>(object_map["game.yaml"].traits()["camera_shake_amp"]);
+	state.my.camera.position += shake;
 
 	{ // draw sky sphere
 		glDepthMask(GL_FALSE);
@@ -132,6 +133,8 @@ void ld50::renderer::draw_game(ld50::state& state)
 	g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(vec<3>{}, vec<3>{ 1000, 0, 0 });
 	g::gfx::debug::print{ &state.my.camera }.color({ 0, 1, 0, 1 }).ray(vec<3>{}, vec<3>{ 0, 1000, 0 });
 	g::gfx::debug::print{ &state.my.camera }.color({ 0, 0, 1, 1 }).ray(vec<3>{}, vec<3>{ 0, 0, 1000 });
+
+	state.my.camera.position -= shake;
 }
 
 ld50::renderer::renderer(g::asset::store& a, std::unordered_map<std::string, g::game::object>& m) : assets(a), object_map(m)

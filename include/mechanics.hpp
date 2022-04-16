@@ -7,6 +7,8 @@ using namespace xmath;
 namespace ld50
 {
 
+vec<3> random_vec(std::default_random_engine& generator, const vec<3>& min = { -1, -1, -1 }, const vec<3> max = { 1, 1, 1 });
+
 float nearest_body_dist(const ld50::state& state, const vec<3>& pos);
 
 vec<3> force_at_point(const ld50::state& state, const vec<3>& pos, float t);

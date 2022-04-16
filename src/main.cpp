@@ -112,6 +112,13 @@ struct ld50_game : public g::core
 			}},
 		});
 
+		object("game.yaml", {
+			{ "traits", {
+				{ "max_time_delta", 0.1 },
+				{ "camera_shake_amp", 0.05 },
+			}
+		}});
+
 		state.my.zoom += SCROLL_D_Y * 0.1f;
 		SCROLL_D_Y = 0;
 
@@ -130,7 +137,7 @@ struct ld50_game : public g::core
 
 		auto f = ld50::force_at_point(state, player.position, state.time);
 		dt /= f.magnitude();
-		dt = std::min<float>(dt, 0.5f);
+		dt = std::min<float>(dt, std::get<float>(object("game.yaml").traits()["max_time_delta"]));
 
 		// ld50::update_body_velocities(state, dt);
 		ld50::update_body_positions(state, state.bodies[0], {});

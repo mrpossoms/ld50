@@ -16,7 +16,14 @@
 //
 //	return sqrtf(least_d2);
 //}
+vec<3> ld50::random_vec(std::default_random_engine& generator, const vec<3>& min, const vec<3> max)
+{
+	std::uniform_real_distribution<float> x(min[0], max[0]);
+	std::uniform_real_distribution<float> y(min[1], max[1]);
+	std::uniform_real_distribution<float> z(min[2], max[2]);
 
+	return { x(generator), y(generator), z(generator) };
+}
 
 vec<3> ld50::force_at_point(const ld50::state& state, const vec<3>& pos, float t)
 {
@@ -82,8 +89,11 @@ void ld50::handle_controls(ld50::state& state, std::unordered_map<std::string, g
 			auto Q = glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_Q) == GLFW_PRESS;
 			auto E = glfwGetKey(g::gfx::GLFW_WIN, GLFW_KEY_E) == GLFW_PRESS;
 
+			player_ship.current_thrust = 0;
+
 			if (Q && E) 
 			{
+				player_ship.current_thrust = thrust;
 				player_ship.dyn_apply_global_force(player_ship.position, -player_ship.velocity.unit() * thrust); 
 			}
 			else if (Q) { d_o = quat<>::from_axis_angle({ 0, 0, -1 }, -dt) * d_o; }
@@ -101,6 +111,7 @@ void ld50::handle_controls(ld50::state& state, std::unordered_map<std::string, g
 
 			if (glfwGetMouseButton(g::gfx::GLFW_WIN, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 			{
+				player_ship.current_thrust = thrust;
 				player_ship.dyn_apply_local_force({ 0, 0, 0 }, { 0, 0, -thrust });
 			}
 		}
@@ -154,12 +165,11 @@ static void populate(ld50::body& parent, unsigned bodies, std::default_random_en
 void ld50::populate_solar_system(ld50::state& state, unsigned bodies, unsigned seed)
 {
 	unsigned spawned = 0;
-	std::default_random_engine generator;
 
 	ld50::body star(kStarRadius, 0.75 * M_PI * pow(kStarRadius, 3.f) * 0);
 	state.bodies.push_back(star);
 
-	populate(state.bodies[0], bodies - 1, generator, kStarRadius);
+	populate(state.bodies[0], bodies - 1, state.generator, kStarRadius);
 }
 
 void ld50::update_body_velocities(ld50::state& state, float dt)

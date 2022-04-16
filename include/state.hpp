@@ -2,6 +2,7 @@
 #include <vector>
 #include <g.dyn.h>
 #include <g.camera.h>
+#include <random>
 
 using namespace xmath;
 using namespace g;
@@ -104,6 +105,8 @@ struct player : public dyn::rigid_body
 	float fuel = 1000;
 	float thrust_per_fuel = 1;
 
+	float current_thrust = 0;
+
 	player()
 	{
 		mass = 1;
@@ -123,6 +126,8 @@ struct state
 	game_state current = game_state::splash;
 
 	game_state operator* () { return this->current; }
+
+	std::default_random_engine generator;
 
 	float time = 0;
 	std::vector<body> bodies;
