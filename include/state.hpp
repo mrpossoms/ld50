@@ -22,7 +22,7 @@ struct kepler
 	float i = 0; //< inclination
 	float O = 0; //< longitude of the ascending node
 	float o = 0; //< argument of periapsis
-	float ν = 0; //< true anomoly
+	float v = 0; //< true anomoly
 
 	float E = M_PI;
 	float T = 0;
@@ -67,8 +67,8 @@ struct kepler
 	//  inline vec<3> position(float mass)
 	//  {
 	//  	auto µ = mass * 1.f; // gravitational param
-	//  	const auto r_mag = a / (1.f + e * cos(ν));
-	//  	const auto r_p = vec<3>{r_mag * cos(ν), r_mag * sin(ν), 0};
+	//  	const auto r_mag = a / (1.f + e * cos(v));
+	//  	const auto r_p = vec<3>{r_mag * cos(v), r_mag * sin(v), 0};
 
 	//  	return perifocal_to_geocentric() * r_p;
 	//  }
