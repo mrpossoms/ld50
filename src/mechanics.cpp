@@ -29,9 +29,9 @@ vec<3> ld50::force_at_point(const ld50::state& state, const vec<3>& pos, float t
 {
 	std::function<vec<3>(const ld50::body&, vec<3>)> net_acc = [&](const ld50::body& b, vec<3> pos) -> vec<3> 
 	{
-		auto G = 1;
-		auto r = b.position_at(t) - pos;
-		vec<3> acc = r.unit() * (G * b.mass) / std::max(0.001f, r.dot(r));
+		//auto G = 1;
+		//auto r = b.position_at(t) - pos;
+		vec<3> acc = b.pull_at(pos, t);
 
 		for (auto& b : b.satellites)
 		{
@@ -46,6 +46,21 @@ vec<3> ld50::force_at_point(const ld50::state& state, const vec<3>& pos, float t
 	for (auto& b : state.bodies)
 	{
 		a += net_acc(b, pos);
+	}
+
+	return a;
+}
+
+vec<3> ld50::force_at_point_branch(ld50::state& state, const vec<3>& pos, float t)
+{
+	vec<3> a = {};
+
+	auto body = &ld50::biggest_influence(state, pos);
+
+	while (body != nullptr)
+	{
+		a += body->pull_at(pos, t);
+		body = body->parent;
 	}
 
 	return a;
@@ -126,7 +141,7 @@ static void populate(ld50::body& parent, unsigned bodies, std::default_random_en
 {
 	std::uniform_real_distribution<float> radius_dist(0.1, 0.5);
 	std::uniform_real_distribution<float> stanard_dist(0, 1);
-	std::uniform_real_distribution<float> sma_dist(parent_radius * 2, parent_radius * 4);
+	std::uniform_real_distribution<float> sma_dist(parent_radius * 4, parent_radius * 8);
 	float sma = parent_radius * 10;
 
 	while (bodies > 0)
@@ -145,10 +160,11 @@ static void populate(ld50::body& parent, unsigned bodies, std::default_random_en
 		// body.position = parent.position + R;
 
 		body.orbit_radius = sma;
-		body.orbit_period = 0.1 * M_PI * sqrtf(pow(sma, 3) / parent.mass);
+		body.orbit_period = M_PI * sqrtf(pow(sma, 2 + ld50::R_POWER) / parent.mass);
 		body.orbit_true_anomoly = stanard_dist(generator);
 
 		body.model_name = std::to_string(body_radius);
+		body.parent = &parent;
 
 		parent.satellites.push_back(body);
 		bodies -= 1;
@@ -189,4 +205,26 @@ void ld50::update_body_positions(ld50::state& state, ld50::body& body, const vec
 	{
 		update_body_positions(state, s, body.position);
 	}
+}
+
+ld50::body& ld50::biggest_influence(ld50::state& state, const vec<3>& pos)
+{
+	ld50::body* body = &state.bodies[0];
+	auto acc = body->pull_at(pos, state.time);
+	auto mag_sq = acc.dot(acc);
+
+	state.for_each_body([&](ld50::body& b) {
+		acc = b.pull_at(pos, state.time);
+		auto b_mag_sq = acc.dot(acc);
+
+		if (b_mag_sq > mag_sq)
+		{
+			mag_sq = b_mag_sq;
+			body = &b;
+		}
+
+		return true;
+	});
+
+	return *body;
 }

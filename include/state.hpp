@@ -10,6 +10,8 @@ using namespace g;
 namespace ld50
 {
 
+const float R_POWER = 1.0f;
+
 enum class game_state
 {
 	splash,
@@ -79,6 +81,7 @@ struct body : public dyn::particle
 {
 	float mass;
 	float radius;
+	body* parent = nullptr;
 	std::vector<body> satellites;
 	std::string model_name;
 
@@ -88,12 +91,19 @@ struct body : public dyn::particle
 
 	body(float r, float m) : radius(r), mass(m) {}
 
+	vec<3> pull_at(const vec<3>& pos, float t) const
+	{
+		auto G = 1;
+		auto r = position_at(t) - pos;
+		return r.unit() * (G * mass) / std::max(0.001f, powf(r.dot(r), R_POWER));
+	}
+
 	vec<3> position_at(float t) const 
 	{
 		auto& r = orbit_radius;
 		auto& T = orbit_period;
 
-		t = 0; // keep all bodies stationary
+		//t = 0; // keep all bodies stationary
 		auto v = (2 * M_PI * (t / T)) + orbit_true_anomoly;
 
 		return vec<3>{cosf(v), 0, sinf(v)} * r;

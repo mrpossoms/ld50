@@ -19,7 +19,7 @@ private:
 	void draw_splash(ld50::state& state);
 	void draw_game(ld50::state& state);
 
-	void render_bodies(ld50::body& b, g::game::camera& cam);
+	void render_bodies(ld50::state& state, ld50::body& b, g::game::camera& cam);
 
 	g::gfx::texture white_noise_rgb;
 	g::gfx::mesh<g::gfx::vertex::pos_norm> sky_sphere;

@@ -57,7 +57,7 @@ struct ld50_game : public g::core
 		//star.satellites.push_back(planet);
 		//state.bodies.push_back(star);
 
-		ld50::populate_solar_system(state, 10, 0);
+		ld50::populate_solar_system(state, 6, 0);
 		ld50::update_body_positions(state, state.bodies[0], {});
 		auto& start_planet = state.bodies[0].satellites[0];
 
@@ -65,14 +65,14 @@ struct ld50_game : public g::core
 		state.my.camera.far = 10000.f;
 
 		ld50::player p;
-		auto r = start_planet.radius * 2;
+		auto r = start_planet.radius * 1.1f;
 		p.position = start_planet.position + vec<3>{ r, 0, 0 };
-		p.linear_momentum = { 0, 0, -sqrt(start_planet.mass / r) };
+		p.linear_momentum = vec<3>{ 0, 0, sqrt(start_planet.mass / powf(r, ld50::R_POWER)) } + ((start_planet.position_at(0.1) - start_planet.position_at(0)) / 0.1f);
 		state.players.push_back(p);
 
 		state.current = ld50::game_state::game;
 
-		glfwSetInputMode(g::gfx::GLFW_WIN, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		//glfwSetInputMode(g::gfx::GLFW_WIN, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		glfwSetScrollCallback(g::gfx::GLFW_WIN, scroll_callback);
 
 		// ld50::kepler k;
@@ -136,6 +136,7 @@ struct ld50_game : public g::core
 		ld50::handle_controls(state, object_map, dt);
 
 		auto f = ld50::force_at_point(state, player.position, state.time);
+		//auto f = ld50::force_at_point_branch(state, player.position, state.time);
 		dt /= f.magnitude();
 		dt = std::min<float>(dt, std::get<float>(object("game.yaml").traits()["max_time_delta"]));
 
