@@ -41,20 +41,37 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 	}
 }
 
-static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& dx0, const vec<3>& base_color, float prediction_time)
+static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& dx0, unsigned prediction_points, const vec<3>& base_color={})
 {
+
+	static std::vector<vec<3>> X;
+	X.clear();
+
+	if (X.capacity() < prediction_points)
+	{
+		X.reserve(prediction_points);
+	}
+
 	glPointSize(3);
 
 	auto x = x0;
 	auto x_prime = dx0;
-	auto dt = 0.1f;
-	for (float t = state.time; t < state.time + prediction_time; t += dt)
+	auto dt = 0.5f;
+
+	X.push_back(x);
+
+	float t = state.time;
+	bool collides = false;
+
+	for (unsigned i = 0; i < prediction_points-1; i++)
 	{
 		auto acc = force_at_point(state, x, t);
-		x_prime += acc * dt;
-		auto x_1 = x + x_prime * dt;
 
-		bool collides = false;
+		auto dt_i = std::min<float>(1, dt / acc.magnitude());
+
+		x_prime += acc * dt_i;
+		auto x_1 = x + x_prime * dt_i;
+
 
 		state.for_each_body([&](ld50::body& b) -> bool {
 			auto r = x_1 - b.position;
@@ -67,13 +84,32 @@ static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& 
 			return true;
 		});
 
+		X.push_back(x_1);
+
 		if (collides) { break; }
 
-		auto a = 1 - ((t - state.time) / prediction_time);
 		//g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).point(x);
-		g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).ray(x, x_1 - x);
-
 		x = x_1;
+	}
+
+	vec<3> color = base_color;
+
+	if (base_color[0] == 0 && base_color[1] == 0 && base_color[2] == 0)
+	{
+		if (collides)
+		{
+			color = vec<3>{ 1, 0, 0 };
+		}
+		else
+		{
+			color = vec<3>{ 0, 1, 0 };
+		}
+	}
+
+	for (unsigned i = 0; i < X.size() - 1; i++)
+	{
+		auto a = 1 - (i / (float)prediction_points);
+		g::gfx::debug::print{ &state.my.camera }.color({ color[0], color[1], color[2], a }).ray(X[i], X[i+1] - X[i]);
 	}
 }
 
@@ -124,11 +160,11 @@ void ld50::renderer::draw_game(ld50::state& state)
 	}
 
 	auto& player = state.my_player(); 
-	draw_trajectory(state, player.position, player.velocity, {1, 0, 0}, 100);
+	draw_trajectory(state, player.position, player.velocity, 500);
 
 	auto f = ld50::force_at_point(state, player.position, state.time);
 	auto thrust = f.magnitude() * std::get<float>(object_map["player-ship.yaml"].traits()["gravity_thrust_mult"]);
-	draw_trajectory(state, player.position, player.velocity + player.orientation.inverse().rotate({0, 0, -thrust }), {1, 1, 1}, 10);
+	draw_trajectory(state, player.position, player.velocity + player.orientation.inverse().rotate({0, 0, -thrust }), 100, {1, 1, 1});
 
 	g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(vec<3>{}, vec<3>{ 1000, 0, 0 });
 	g::gfx::debug::print{ &state.my.camera }.color({ 0, 1, 0, 1 }).ray(vec<3>{}, vec<3>{ 0, 1000, 0 });
