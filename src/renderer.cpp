@@ -11,7 +11,7 @@ void ld50::renderer::draw_splash(ld50::state& state)
 
 void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 {
-	auto& planet_shader = assets.shader("pos_uv_norm.vs+normal_debug.fs");
+	auto& planet_shader = assets.shader(b.position == vec<3>{0, 0, 0} ? "pos_uv_norm.vs+star.fs" : "pos_uv_norm.vs+body.fs");
 
 	auto itr = planet_meshes.find(b.model_name);
 	if (itr == planet_meshes.end())
@@ -20,7 +20,7 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 		auto sphere = [&](const vec<3>& p) -> float { return p.magnitude() - r; };
 		auto gen = [](const g::game::sdf& sdf, const vec<3>& pos) -> g::gfx::vertex::pos_norm
 		{
-			return { pos, -pos.unit() };
+			return { pos, pos.unit() };
 		};
 		vec<3> corners[] = {
 			{ -r,-r,-r },
@@ -54,43 +54,7 @@ static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& 
 
 	glPointSize(3);
 
-	auto x = x0;
-	auto x_prime = dx0;
-	auto dt = 0.5f;
-
-	X.push_back(x);
-
-	float t = state.time;
-	bool collides = false;
-
-	for (unsigned i = 0; i < prediction_points-1; i++)
-	{
-		auto acc = force_at_point(state, x, t);
-
-		auto dt_i = std::min<float>(1, dt / acc.magnitude());
-
-		x_prime += acc * dt_i;
-		auto x_1 = x + x_prime * dt_i;
-
-
-		state.for_each_body([&](ld50::body& b) -> bool {
-			auto r = x_1 - b.position;
-			if (r.dot(r) < (b.radius * b.radius))
-			{
-				collides = true;
-				return false;
-			}
-
-			return true;
-		});
-
-		X.push_back(x_1);
-
-		if (collides) { break; }
-
-		//g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).point(x);
-		x = x_1;
-	}
+	auto collides = ld50::propagate_trajectory(state, x0, dx0, X);
 
 	vec<3> color = base_color;
 
@@ -108,7 +72,12 @@ static void draw_trajectory(ld50::state& state, const vec<3>& x0, const vec<3>& 
 
 	for (unsigned i = 0; i < X.size() - 1; i++)
 	{
-		auto a = 1 - (i / (float)prediction_points);
+		//auto& b = ld50::nearest_body(state, X[i]);
+		auto acc = ld50::force_at_point(state, X[i], state.time);
+		auto proximity_a = acc.magnitude();
+
+		auto a = std::max<float>(proximity_a, 0.125f);
+
 		g::gfx::debug::print{ &state.my.camera }.color({ color[0], color[1], color[2], a }).ray(X[i], X[i+1] - X[i]);
 	}
 }

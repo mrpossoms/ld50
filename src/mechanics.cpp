@@ -4,18 +4,71 @@
 #include <random>
 #include <variant>
 
-//float nearest_body_dist(ld50::state& state, const vec<3>& pos)
-//{
-//	float least_d2 = INFINITY;
-//	state.for_each_body([&](ld50::body& b) {
-//		auto d = b.position - pos;
-//		auto d2 = d.dot(d);
-//
-//		least_d2 = std::min<float>(least_d2, d2);
-//	});
-//
-//	return sqrtf(least_d2);
-//}
+ld50::body& ld50::nearest_body(ld50::state& state, const vec<3>& pos)
+{
+	float least_d2 = INFINITY;
+	ld50::body* body = nullptr;
+
+	state.for_each_body([&](ld50::body& b) -> bool {
+		auto d = b.position - pos;
+		auto d2 = d.dot(d);
+
+		if (least_d2 > d2)
+		{
+			least_d2 = d2;
+			body = &b;
+		}
+
+		return true;
+	});
+
+	return *body;
+}
+
+bool ld50::propagate_trajectory(ld50::state& state, const vec<3>& pos_0, const vec<3>& vel_0, std::vector<vec<3>>& trajectory_out)
+{
+	auto x = pos_0;
+	auto x_prime = vel_0;
+	auto dt = 0.5f;
+
+	trajectory_out.push_back(x);
+
+	float t = state.time;
+	bool collides = false;
+
+	for (unsigned i = 0; i < trajectory_out.capacity() - 1; i++)
+	{
+		auto acc = force_at_point(state, x, t);
+
+		auto dt_i = std::min<float>(1, dt / acc.magnitude());
+
+		x_prime += acc * dt_i;
+		auto x_1 = x + x_prime * dt_i;
+
+
+		state.for_each_body([&](ld50::body& b) -> bool {
+			auto r = x_1 - b.position;
+			if (r.dot(r) < (b.radius * b.radius))
+			{
+				collides = true;
+				return false;
+			}
+
+			return true;
+			});
+
+		trajectory_out.push_back(x_1);
+
+		if (collides) { break; }
+
+		//g::gfx::debug::print{ &state.my.camera }.color({ base_color[0], base_color[1], base_color[2], a }).point(x);
+		x = x_1;
+	}
+
+	return collides;
+}
+
+
 vec<3> ld50::random_vec(std::default_random_engine& generator, const vec<3>& min, const vec<3> max)
 {
 	std::uniform_real_distribution<float> x(min[0], max[0]);

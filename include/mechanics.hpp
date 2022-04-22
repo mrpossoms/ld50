@@ -9,7 +9,11 @@ namespace ld50
 
 vec<3> random_vec(std::default_random_engine& generator, const vec<3>& min = { -1, -1, -1 }, const vec<3> max = { 1, 1, 1 });
 
-float nearest_body_dist(const ld50::state& state, const vec<3>& pos);
+ld50::body& nearest_body(ld50::state& state, const vec<3>& pos);
+
+// float nearest_body_dist(const ld50::state& state, const vec<3>& pos);
+
+bool propagate_trajectory(ld50::state& state, const vec<3>& pos_0, const vec<3>& vel_0, std::vector<vec<3>>& trajectory_out);
 
 vec<3> force_at_point(const ld50::state& state, const vec<3>& pos, float t);
 
