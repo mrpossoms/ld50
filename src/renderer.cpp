@@ -4,6 +4,39 @@
 
 using mat4 = xmath::mat<4, 4>;
 
+struct trajectory : public g::gfx::mesh<g::gfx::vertex::pos_norm_color>
+{
+	std::vector<g::gfx::vertex::pos_norm_color> verts;
+
+	trajectory()
+	{
+		glCreateBuffers(1, &vbo);
+	}
+
+	~trajectory()
+	{
+		destroy();
+	}
+
+	void set(const std::vector<vec<3>>& X, const std::vector<vec<4>>& colors)
+	{
+		if (verts.capacity() < X.size())
+		{
+			verts.reserve(X.size());
+			verts.clear();
+		}
+		
+		for (unsigned i = 0; i < X.size(); i++)
+		{
+			verts.push_back({ X[i], vec<3>{}, (colors[i] * 255).cast<uint8_t>() });
+		}
+
+		set_vertices(verts);
+	}
+};
+
+static std::unordered_map<std::string, trajectory> TRAJECTORIES;
+
 void ld50::renderer::draw_splash(ld50::state& state)
 {
 
@@ -26,13 +59,29 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 			{ -r,-r,-r },
 			{  r, r, r },
 		};
-		planet_meshes[b.model_name] = g::gfx::mesh_factory::from_sdf<g::gfx::vertex::pos_norm>(sphere, gen, corners);	
+		planet_meshes[b.model_name] = g::gfx::mesh_factory::from_sdf<g::gfx::vertex::pos_norm>(sphere, gen, corners);
+
+		std::vector<vec<3>> X;
+		std::vector<vec<4>> colors;
+
+		for (float t = 0; t < 2 * M_PI; t += 0.01f)
+		{
+			X.push_back(quat<>::from_axis_angle({ 0, 1, 0 }, t).rotate(b.position));
+			colors.push_back({ 0.5f, 0.5f, 0.5f, 1 });
+		}
+
+		TRAJECTORIES[b.model_name].set(X, colors);
 	}
 
 	planet_meshes[b.model_name].using_shader(planet_shader)
 		.set_camera(cam)
 		["u_model"].mat4(mat4::translation(b.position))
 		.draw<GL_TRIANGLES>();
+
+	TRAJECTORIES[b.model_name].using_shader(assets.shader("position_normal_color.vs+trajectory.fs"))
+		.set_camera(cam)
+		["u_model"].mat4(mat4::I())
+		.draw<GL_LINE_LOOP>();
 	//draw_trajectory(state, )
 
 	for (auto& sat : b.satellites)

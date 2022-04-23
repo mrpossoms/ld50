@@ -62,7 +62,7 @@ struct ld50_game : public g::core
 		auto& start_planet = state.bodies[0].satellites[0];
 
 		state.my.camera.near = 1.f;
-		state.my.camera.far = 10000.f;
+		state.my.camera.far = 100000.f;
 
 		ld50::player p;
 		auto r = start_planet.radius * 2;

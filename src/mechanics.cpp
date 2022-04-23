@@ -179,7 +179,7 @@ static void populate(ld50::body& parent, unsigned bodies, std::default_random_en
 {
 	std::uniform_real_distribution<float> radius_dist(0.1, 0.5);
 	std::uniform_real_distribution<float> stanard_dist(0, 1);
-	std::uniform_real_distribution<float> sma_dist(parent_radius * 2, parent_radius * 4);
+	std::uniform_real_distribution<float> sma_dist(parent_radius * 4, parent_radius * 8);
 	float sma = parent_radius * 10;
 
 	while (bodies > 0)
@@ -199,14 +199,14 @@ static void populate(ld50::body& parent, unsigned bodies, std::default_random_en
 
 		body.orbit_radius = sma;
 		body.orbit_period = 0.1 * M_PI * sqrtf(pow(sma, 3) / parent.mass);
-		body.orbit_true_anomoly = stanard_dist(generator);
+		body.orbit_true_anomoly = stanard_dist(generator) * 2 * M_PI;
 
-		body.model_name = std::to_string(body_radius);
+		body.model_name = std::to_string(rand());
 
 		parent.satellites.push_back(body);
 		bodies -= 1;
 
-		if (stanard_dist(generator) > 0.99)
+		if (stanard_dist(generator) > 1.0)
 		{
 			auto body_satellites = (unsigned)ceil(radius_dist(generator) * bodies);
 			bodies -= body_satellites;
