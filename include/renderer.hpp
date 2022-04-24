@@ -26,6 +26,8 @@ private:
 	std::unordered_map<std::string, g::gfx::mesh<g::gfx::vertex::pos_norm>> planet_meshes;
 	g::asset::store& assets;
 	std::unordered_map<std::string, g::game::object>& object_map;
+
+	std::unordered_map<std::string, g::gfx::mesh<g::gfx::vertex::pos_norm_color>> voxel_meshes;
 };
 
 } // namespace ld50

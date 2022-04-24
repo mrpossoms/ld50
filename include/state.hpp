@@ -107,6 +107,8 @@ struct player : public dyn::rigid_body
 
 	float current_thrust = 0;
 
+	std::string name = "player";
+
 	player()
 	{
 		mass = 1;

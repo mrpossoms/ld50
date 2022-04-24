@@ -163,7 +163,25 @@ void ld50::renderer::draw_game(ld50::state& state)
 		glDisable(GL_CULL_FACE);
 		for (auto& player : state.players)
 		{
-			object_map["player-ship.yaml"].geometry("hull").using_shader(player_shader)
+			auto itr = voxel_meshes.find(player.name);
+			if (itr == voxel_meshes.end())
+			{
+				auto& vox = assets.vox("cockpit_0.vox");
+				auto com = vox.center_of_mass(true);
+
+				voxel_meshes[player.name] = g::gfx::mesh_factory::from_voxels<g::gfx::vertex::pos_norm_color>(
+					vox, 
+					[&](ogt_mesh_vertex* v) -> g::gfx::vertex::pos_norm_color { // TODO: make a default from_voxels function
+						
+						return {
+							(vec<3>{ v->pos.x, v->pos.y, v->pos.z } - com) * 0.02f,
+							{ v->normal.x, v->normal.y, v->normal.z },
+							{ v->color.r, v->color.g, v->color.b, v->color.a },
+						};
+				});
+			}
+
+			voxel_meshes[player.name].using_shader(player_shader)
 				.set_camera(state.my.camera)
 				["u_model"].mat4(player.orientation.to_matrix() * mat<4, 4>::translation(player.position))
 				.draw<GL_TRIANGLES>();
