@@ -220,6 +220,8 @@ void ld50::populate_solar_system(ld50::state& state, unsigned bodies, unsigned s
 	unsigned spawned = 0;
 
 	ld50::body star(kStarRadius, 0.75 * M_PI * pow(kStarRadius, 3.f) * 0);
+	star.model_name = "star";
+	
 	state.bodies.push_back(star);
 
 	populate(state.bodies[0], bodies - 1, state.generator, kStarRadius);

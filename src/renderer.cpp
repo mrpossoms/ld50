@@ -10,7 +10,7 @@ struct trajectory : public g::gfx::mesh<g::gfx::vertex::pos_norm_color>
 
 	trajectory()
 	{
-		glCreateBuffers(1, &vbo);
+		glGenBuffers(1, &vbo);
 	}
 
 	~trajectory()
@@ -70,6 +70,7 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 			colors.push_back({ 0.5f, 0.5f, 0.5f, 1 });
 		}
 
+		TRAJECTORIES.insert({b.model_name, {}});
 		TRAJECTORIES[b.model_name].set(X, colors);
 	}
 

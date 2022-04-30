@@ -16,6 +16,20 @@ enum class game_state
 	game,
 };
 
+template<size_t N>
+struct economic_state
+{
+	mat<N * 2, 1> x;
+	mat<N * 2, N * 2> stm;
+
+	void step(float dt)
+	{
+		x += (stm * x) * dt;
+	}
+
+
+};
+
 struct kepler
 {
 	float e = 0; //< eccentricity
