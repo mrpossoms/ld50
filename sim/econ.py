@@ -5,18 +5,27 @@ import plotly
 import plotly.subplots
 import plotly.graph_objects as go
 
+goods = 6
+stm = np.random.randn(goods, goods)
+print(stm)
+mask = np.random.randint(2, size=stm.shape)
+print(mask)
+stm *= mask
+np.fill_diagonal(stm, -np.abs(np.random.randn(goods)))
 
-stm = np.random.randn(6, 6)
-x = np.random.randn(6, 1)
+x = np.random.randn(goods, 1)
+
+
+
+print(stm)
 
 X = [x]
 
 traces = {}
 
-for _ in range(200):
+for _ in range(500):
 	x_t = X[-1]
 	for i in range(x.shape[0]):
-		print(i)
 		if i not in traces:
 			traces[i] = []
 		else:
