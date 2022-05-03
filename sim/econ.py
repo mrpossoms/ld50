@@ -66,31 +66,20 @@ def foob():
 	S_traces = {}
 	D = [demand]
 	S = [np.abs(np.random.randn(goods)) * 2]
-	P = [demand * 0]
+	P = [np.abs(np.random.randn(goods))]
 
-	# I think supply and demand might be 2 sides of the same coin
-	def supply():
-		# todo
-		return
-
-	# def demand():
-	# 	# todo
-	# 	return
-
-	def price(good, supply, demand, inputs, profit=1.2, last=None):
-		if last == good:
-			return 0
+	def price(good, supply, demand, inputs, last_prices, profit=1.2):
 		# pi(x, t) = x * p(x) - C(x) - tx
 		# where p(x) is the market price if it is supplied at rate x
 		# C(x) is the production cost
 		# x * p(x) is the revenue returned from selling
 		
-		# prod_cost = 0
-		# for i in range(len(inputs[good])):
-		# 	prod_cost += price(i, supply, demand, inputs, i)
+		prod_cost = 0
+		for i in range(len(inputs[good])):
+			prod_cost += last_prices[i] * inputs[good][i]
 
 		# return supply / demand
-		return profit * (demand[good] / np.maximum(0.0001, supply[good]))
+		return profit * (prod_cost + (demand[good] / np.maximum(0.0001, supply[good])))
 
 
 
@@ -119,7 +108,7 @@ def foob():
 		
 		p = np.zeros(goods)
 		for i in range(goods):
-			p[i] = price(i, S_t_1, D_t_1, inputs)
+			p[i] = price(i, S_t_1, D_t_1, inputs, P[-1])
 		P.append(p)
 
 
