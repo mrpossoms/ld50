@@ -52,7 +52,7 @@ def stms():
 
 
 def foob():
-	goods = 1
+	goods = 2
 	
 	demand = np.maximum(np.zeros(goods), np.random.randn(goods))
 	
@@ -65,7 +65,7 @@ def foob():
 	P_traces = {}
 	S_traces = {}
 	D = [demand]
-	S = [np.maximum(np.zeros(goods), np.random.randn(goods))]
+	S = [np.abs(np.random.randn(goods)) * 2]
 	P = [demand * 0]
 
 	# I think supply and demand might be 2 sides of the same coin
@@ -85,18 +85,16 @@ def foob():
 		# C(x) is the production cost
 		# x * p(x) is the revenue returned from selling
 		
-		prod_cost = 0
-		for i in range(len(inputs[good])):
-			prod_cost += price(i, supply, demand, inputs, i)
-
-		sale_price = prod_cost * profit_percentage
+		# prod_cost = 0
+		# for i in range(len(inputs[good])):
+		# 	prod_cost += price(i, supply, demand, inputs, i)
 
 		# return supply / demand
-		return sale_price * (demand[good] / supply[good])
+		return profit * (demand[good] / np.maximum(0.0001, supply[good]))
 
 
 
-	for _ in range(500):
+	for _ in range(10000):
 		D_t_1 = D[-1]
 		S_t_1 = S[-1]
 		P_t_1 = P[-1]
@@ -116,8 +114,8 @@ def foob():
 
 		# make supply lag demand simulated as an alpha filter
 		r = D_t_1 - S_t_1
-		a = 0.1
-		S.append(S_t_1 + a * r)
+		a = 0.005
+		S.append((S_t_1 + a * r) * (1 - 0.001))
 		
 		p = np.zeros(goods)
 		for i in range(goods):
@@ -133,16 +131,13 @@ def foob():
 
 	for i in range(goods):
 		fig.add_trace(
-			go.Scatter(y=D_traces[i]),
-			# name='demand',
+			go.Scatter(name=f'good{i} demand',y=D_traces[i]),
 			row=1, col=1)
 		fig.add_trace(
-			go.Scatter(y=S_traces[i]),
-			# name='supply',
+			go.Scatter(name=f'good{i} supply', y=S_traces[i]),
 			row=1, col=1)
 		fig.add_trace(
-			go.Scatter(y=P_traces[i]),
-			# name='price',
+			go.Scatter(name=f'good{i} price', y=P_traces[i]),
 			row=1, col=1)
 
 	fig.show()
