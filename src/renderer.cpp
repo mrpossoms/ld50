@@ -46,7 +46,7 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 {
 	auto& planet_shader = assets.shader(b.position == vec<3>{0, 0, 0} ? "pos_uv_norm.vs+star.fs" : "pos_uv_norm.vs+body.fs");
 
-	auto itr = planet_meshes.find(b.model_name);
+	auto itr = planet_meshes.find(b.name);
 	if (itr == planet_meshes.end())
 	{
 		float r = b.radius;
@@ -59,7 +59,7 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 			{ -r,-r,-r },
 			{  r, r, r },
 		};
-		planet_meshes[b.model_name] = g::gfx::mesh_factory::from_sdf<g::gfx::vertex::pos_norm>(sphere, gen, corners);
+		planet_meshes[b.name] = g::gfx::mesh_factory::from_sdf<g::gfx::vertex::pos_norm>(sphere, gen, corners);
 
 		std::vector<vec<3>> X;
 		std::vector<vec<4>> colors;
@@ -70,16 +70,16 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 			colors.push_back({ 0.5f, 0.5f, 0.5f, 1 });
 		}
 
-		TRAJECTORIES.insert({b.model_name, {}});
-		TRAJECTORIES[b.model_name].set(X, colors);
+		TRAJECTORIES.insert({b.name, {}});
+		TRAJECTORIES[b.name].set(X, colors);
 	}
 
-	planet_meshes[b.model_name].using_shader(planet_shader)
+	planet_meshes[b.name].using_shader(planet_shader)
 		.set_camera(cam)
 		["u_model"].mat4(mat4::translation(b.position))
 		.draw<GL_TRIANGLES>();
 
-	TRAJECTORIES[b.model_name].using_shader(assets.shader("position_normal_color.vs+trajectory.fs"))
+	TRAJECTORIES[b.name].using_shader(assets.shader("position_normal_color.vs+trajectory.fs"))
 		.set_camera(cam)
 		["u_model"].mat4(mat4::I())
 		.draw<GL_LINE_LOOP>();

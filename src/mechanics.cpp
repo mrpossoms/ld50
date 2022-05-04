@@ -197,11 +197,12 @@ static void populate(ld50::body& parent, unsigned bodies, std::default_random_en
 		// body.velocity = vec<3>::cross(R, {0, -1, 0}).unit() * sqrtf((parent.mass + body.mass) / sma) * 40;
 		// body.position = parent.position + R;
 
+		body.economy = ld50::economic_state<9>(generator);
 		body.orbit_radius = sma;
 		body.orbit_period = 0.1 * M_PI * sqrtf(pow(sma, 3) / parent.mass);
 		body.orbit_true_anomoly = stanard_dist(generator) * 2 * M_PI;
 
-		body.model_name = std::to_string(rand());
+		body.name = std::to_string(rand());
 
 		parent.satellites.push_back(body);
 		bodies -= 1;
@@ -220,7 +221,7 @@ void ld50::populate_solar_system(ld50::state& state, unsigned bodies, unsigned s
 	unsigned spawned = 0;
 
 	ld50::body star(kStarRadius, 0.75 * M_PI * pow(kStarRadius, 3.f) * 0);
-	star.model_name = "star";
+	star.name = "star";
 	
 	state.bodies.push_back(star);
 

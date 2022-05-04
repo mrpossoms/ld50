@@ -19,82 +19,47 @@ enum class game_state
 template<size_t N>
 struct economic_state
 {
-	mat<N * 2, 1> x;
-	mat<N * 2, N * 2> stm;
+	vec<N> supply;
+	vec<N> demand;
+	vec<N> prices;
+	mat<N, N> inputs;
 
-	void step(float dt)
+	economic_state() = default;
+
+	economic_state(std::default_random_engine& gen)
 	{
-		x += (stm * x) * dt;
+		supply = ld50::random_norm_vec<N>(gen).abs() * 2;
+		demand = ld50::random_norm_vec<N>(gen).take_max({});
+		prices = ld50::random_norm_vec<N>(gen).abs();
+
+		{ // setup inputs
+			// setup good input proportions the first three goods
+			// are raw materials and have no inputs
+			for (unsigned i = 3; i < N; i++)
+			{
+				inputs[i] = ld50::random_norm_vec<N>(gen).abs();
+			}
+
+			// create a tiered system of goods where goods at the bottom
+			// row of the input matrix have the most other goods they depend
+			// on for production
+			for (unsigned r = 0; r < N; r++)
+			for (unsigned c = 0; c < N; c++)
+			{
+				if (r <= c) { inputs[r][c] = 0; }
+			}
+		}
 	}
-
-
 };
 
-struct kepler
-{
-	float e = 0; //< eccentricity
-	float a = 0; //< semi-major axis
-	float i = 0; //< inclination
-	float O = 0; //< longitude of the ascending node
-	float o = 0; //< argument of periapsis
-	float v = 0; //< true anomoly
-
-	float E = M_PI;
-	float T = 0;
-
-	inline mat<3, 3> perifocal_to_geocentric()
-	{
-        const auto c_O = cos(O), s_O = sin(O);
-        const auto c_o = cos(o), s_o = sin(o);
-        const auto c_i = cos(i), s_i = sin(i);
-
-        // transformation matrix between perifocal coords to geocentric
-        return {
-            { c_O * c_o - s_O * s_o * c_i, -c_O * s_o - s_O * c_o * c_i,  s_O * s_i, },
-            { s_O * c_o + c_O * s_o * c_i, -s_O * s_o + c_O * c_o * c_i, -c_O * s_i, },
-            { s_o * s_i,                   c_o * s_i,                     c_i      , },
-        };// .transpose();
-	}
-
-	// inline vec<3> velocity(float mass)
-	// {
-	// 	auto mu = mass * 1.f; // gravitational param
-	// 	auto n = sqrtf(mu/pow(a,3));
-	// 	auto M = n * t;
-
-	// 	// M = E - e sin(E)
-	// 	auto k_fn = [this](float E) -> float { return E - e * sin(E); };
-	// 	for (; fabsf(k_fn(E) - M) > 0.0001;)
-	// 	{
-	// 		const auto h = 0.5f;
-
-	// 		//auto dk = (k_fn(E + h) - k_fn(E)) / h;
-	// 		auto r = k_fn(E) - M;
-	// 		E -= r * h;
-
-	// 		// std::cerr << r << " " << E << std::endl;
-	// 	}
-
-	// 	auto p = vec<3>{ -sinf(E), 0, sqrtf(1.f - e * e) * cosf(E) } * sqrtf(mu * a)/;
-	//  	return perifocal_to_geocentric() * p;
-	//  }
-
-	//  inline vec<3> position(float mass)
-	//  {
-	//  	auto µ = mass * 1.f; // gravitational param
-	//  	const auto r_mag = a / (1.f + e * cos(v));
-	//  	const auto r_p = vec<3>{r_mag * cos(v), r_mag * sin(v), 0};
-
-	//  	return perifocal_to_geocentric() * r_p;
-	//  }
-};
 
 struct body : public dyn::particle
 {
 	float mass;
 	float radius;
 	std::vector<body> satellites;
-	std::string model_name;
+	std::string name;
+	economic_state<9> economy;
 
 	float orbit_radius = 0;
 	float orbit_period = 1;
