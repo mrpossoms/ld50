@@ -74,15 +74,22 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 		TRAJECTORIES[b.name].set(X, colors);
 	}
 
+	auto model = mat4::translation(b.position);
 	planet_meshes[b.name].using_shader(planet_shader)
 		.set_camera(cam)
-		["u_model"].mat4(mat4::translation(b.position))
+		["u_model"].mat4(model)
 		.draw<GL_TRIANGLES>();
 
 	TRAJECTORIES[b.name].using_shader(assets.shader("position_normal_color.vs+trajectory.fs"))
 		.set_camera(cam)
 		["u_model"].mat4(mat4::I())
 		.draw<GL_LINE_LOOP>();
+	
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	text.draw(assets.shader("basic_gui.vs+basic_font.fs"), b.name, cam, mat<4, 4>::scale({ 10.f, 10.f, 10.f }) * model);
+	glEnable(GL_DEPTH_TEST);
+
 	//draw_trajectory(state, )
 
 	for (auto& sat : b.satellites)
@@ -210,9 +217,8 @@ void ld50::renderer::draw_game(ld50::state& state)
 	state.my.camera.position -= shake;
 }
 
-ld50::renderer::renderer(g::asset::store& a, std::unordered_map<std::string, g::game::object>& m) : assets(a), object_map(m)
+ld50::renderer::renderer(g::asset::store& a, std::unordered_map<std::string, g::game::object>& m) : assets(a), object_map(m), text(a.font("UbuntuMono-B.ttf"))
 {
-	
 	
 	{ // create sky sphere geometry.
 		auto sphere = [](const vec<3>& p) -> float { return 100 - p.magnitude(); };

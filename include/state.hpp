@@ -43,10 +43,10 @@ struct economic_state
 			// create a tiered system of goods where goods at the bottom
 			// row of the input matrix have the most other goods they depend
 			// on for production
-			for (unsigned r = 0; r < N; r++)
-			for (unsigned c = 0; c < N; c++)
+			for (int r = 0; r < N; r++)
+			for (int c = 0; c < N; c++)
 			{
-				if (r <= c) { inputs[r][c] = 0; }
+				if ((r - 3) <= c) { inputs[r][c] = 0; }
 			}
 		}
 	}
