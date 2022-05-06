@@ -217,7 +217,14 @@ void ld50::renderer::draw_game(ld50::state& state)
 
 	glDisable(GL_DEPTH_TEST);
 	auto b = ld50::nearest_body(state, player.position);
-	text.draw(assets.shader("basic_gui.vs+basic_font.fs"), b.name, mat<4, 4>::I(), mat<4, 4>::scale({ 1.f, 1.f, 1.f }));
+	//text.draw(assets.shader("basic_gui.vs+basic_font.fs"), b.name, mat<4, 4>::I(), mat<4, 4>::scale({ 1.f, 1.f, 1.f }));
+	text.using_shader(assets.shader("basic_gui.vs+basic_font.fs"), b.name, [&](g::gfx::shader::usage& usage) {
+		usage["u_font_color"].vec4({ 1, 1, 1, 1 })
+			["u_view"].mat4(mat<4, 4>::I())
+			["u_proj"].mat4(mat<4, 4>::I())
+			["u_model"].mat4(mat<4, 4>::I());
+	}).draw<GL_TRIANGLES>();
+	
 	glDisable(GL_DEPTH_TEST);
 
 	state.my.camera.position -= shake;
