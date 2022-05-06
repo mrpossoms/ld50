@@ -215,6 +215,11 @@ void ld50::renderer::draw_game(ld50::state& state)
 	g::gfx::debug::print{ &state.my.camera }.color({ 0, 1, 0, 1 }).ray(vec<3>{}, vec<3>{ 0, 1000, 0 });
 	g::gfx::debug::print{ &state.my.camera }.color({ 0, 0, 1, 1 }).ray(vec<3>{}, vec<3>{ 0, 0, 1000 });
 
+	glDisable(GL_DEPTH_TEST);
+	auto b = ld50::nearest_body(state, player.position);
+	text.draw(assets.shader("basic_gui.vs+basic_font.fs"), b.name, mat<4, 4>::I(), mat<4, 4>::scale({ 1.f, 1.f, 1.f }));
+	glDisable(GL_DEPTH_TEST);
+
 	state.my.camera.position -= shake;
 }
 
