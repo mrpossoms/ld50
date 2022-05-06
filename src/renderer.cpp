@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 #include "mechanics.hpp"
+#include "utils.hpp"
 #include <random>
 
 using mat4 = xmath::mat<4, 4>;

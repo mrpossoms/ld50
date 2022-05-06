@@ -4,6 +4,8 @@
 #include <g.camera.h>
 #include <random>
 
+#include "utils.hpp"
+
 using namespace xmath;
 using namespace g;
 

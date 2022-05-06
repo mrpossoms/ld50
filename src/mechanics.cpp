@@ -68,16 +68,6 @@ bool ld50::propagate_trajectory(ld50::state& state, const vec<3>& pos_0, const v
 	return collides;
 }
 
-
-vec<3> ld50::random_vec(std::default_random_engine& generator, const vec<3>& min, const vec<3> max)
-{
-	std::uniform_real_distribution<float> x(min[0], max[0]);
-	std::uniform_real_distribution<float> y(min[1], max[1]);
-	std::uniform_real_distribution<float> z(min[2], max[2]);
-
-	return { x(generator), y(generator), z(generator) };
-}
-
 vec<3> ld50::force_at_point(const ld50::state& state, const vec<3>& pos, float t)
 {
 	std::function<vec<3>(const ld50::body&, vec<3>)> net_acc = [&](const ld50::body& b, vec<3> pos) -> vec<3> 
