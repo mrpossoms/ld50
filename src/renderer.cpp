@@ -85,11 +85,6 @@ void ld50::renderer::render_bodies(ld50::body& b, g::game::camera& cam)
 		.set_camera(cam)
 		["u_model"].mat4(mat4::I())
 		.draw<GL_LINE_LOOP>();
-	
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	text.draw(assets.shader("basic_gui.vs+basic_font.fs"), b.name, cam, mat<4, 4>::scale({ 10.f, 10.f, 10.f }) * model);
-	glEnable(GL_DEPTH_TEST);
 
 	//draw_trajectory(state, )
 
@@ -223,27 +218,27 @@ void ld50::renderer::draw_game(ld50::state& state)
 	auto b = ld50::nearest_body(state, player.position);
 	//text.draw(assets.shader("basic_gui.vs+basic_font.fs"), b.name, mat<4, 4>::I(), mat<4, 4>::scale({ 1.f, 1.f, 1.f }));
 	
-	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-	text.using_shader(assets.shader("basic_gui.vs+basic_font.fs"), b.name, [&](g::gfx::shader::usage& usage) {
-		usage["u_font_color"].vec4({ 1, 1, 1, 1 })
-			.set_camera(state.my.camera)
-			// ["u_view"].mat4(mat<4, 4>::I())
-			// ["u_proj"].mat4(mat<4, 4>::I())
-			// ["u_model"].mat4(mat<4, 4>::scale(vec<3>{1, 1, 1} * sin(state.time)));
-			["u_model"].mat4(mat<4,4>::translation(player.position));
-	}).draw<GL_TRIANGLES>();
+
 	
 	auto w = g::gfx::width();
 	auto h = g::gfx::height();
 
+	auto welcome = "Welcome to " + b.name;
+	vec<2> offset, dims;
+	text.measure(welcome, dims, offset);
+
+	vec<2> pos = { 0, h * 0.5f };
+	pos -= dims * 0.5f;
+	pos += offset;
+
 	glDisable(GL_DEPTH_TEST);
-	auto us = text.using_shader(assets.shader("basic_gui.vs+basic_font.fs"), b.name, [&](g::gfx::shader::usage& usage) {
+	auto us = text.using_shader(assets.shader("basic_gui.vs+basic_font.fs"), welcome, [&](g::gfx::shader::usage& usage) {
 		usage["u_font_color"].vec4({ 1, 1, 1, 1 })
 			// .set_camera(state.my.camera)
 			["u_view"].mat4(mat<4, 4>::I())
 			["u_proj"].mat4(mat<4, 4>::orthographic(1, -1, w * -0.5f, w * 0.5f, h * 0.5f, h * -0.5f))
-			["u_model"].mat4(mat<4, 4>::scale(vec<3>{1, 1, 1} * 1.f));
+			["u_model"].mat4(mat<4, 4>::translation({ pos[0], pos[1], 0 }));
 			// ["u_model"].mat4(mat<4,4>::translation(player.position));
 	});
 	us.draw<GL_TRIANGLES>();
@@ -253,7 +248,10 @@ void ld50::renderer::draw_game(ld50::state& state)
 	state.my.camera.position -= shake;
 }
 
-ld50::renderer::renderer(g::asset::store& a, std::unordered_map<std::string, g::game::object>& m) : assets(a), object_map(m), text(a.font("UbuntuMono-B.ttf"))
+ld50::renderer::renderer(g::asset::store& a, std::unordered_map<std::string, g::game::object>& m) : 
+	assets(a),
+	object_map(m),
+	text(a.font("UbuntuMono-B.16pt.ttf"))
 {
 	
 	{ // create sky sphere geometry.

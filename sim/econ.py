@@ -52,7 +52,7 @@ def stms():
 
 
 def foob():
-	goods = 2
+	goods = 4
 	
 	demand = np.maximum(np.zeros(goods), np.random.randn(goods))
 	
