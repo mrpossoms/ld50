@@ -205,27 +205,50 @@ void ld50::renderer::draw_game(ld50::state& state)
 	}
 
 	auto& player = state.my_player(); 
-	draw_trajectory(state, player.position, player.velocity, 500);
 
-	auto f = ld50::force_at_point(state, player.position, state.time);
-	auto thrust = f.magnitude() * std::get<float>(object_map["player-ship.yaml"].traits()["gravity_thrust_mult"]);
-	draw_trajectory(state, player.position, player.velocity + player.orientation.inverse().rotate({0, 0, -thrust }), 100, {1, 1, 1});
+	// draw player trajectories
+	{
+		draw_trajectory(state, player.position, player.velocity, 500);
 
-	g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(vec<3>{}, vec<3>{ 1000, 0, 0 });
-	g::gfx::debug::print{ &state.my.camera }.color({ 0, 1, 0, 1 }).ray(vec<3>{}, vec<3>{ 0, 1000, 0 });
-	g::gfx::debug::print{ &state.my.camera }.color({ 0, 0, 1, 1 }).ray(vec<3>{}, vec<3>{ 0, 0, 1000 });
+		auto f = ld50::force_at_point(state, player.position, state.time);
+		auto thrust = f.magnitude() * std::get<float>(object_map["player-ship.yaml"].traits()["gravity_thrust_mult"]);
+		draw_trajectory(state, player.position, player.velocity + player.orientation.inverse().rotate({0, 0, -thrust }), 100, {1, 1, 1});
+
+		g::gfx::debug::print{ &state.my.camera }.color({ 1, 0, 0, 1 }).ray(vec<3>{}, vec<3>{ 1000, 0, 0 });
+		g::gfx::debug::print{ &state.my.camera }.color({ 0, 1, 0, 1 }).ray(vec<3>{}, vec<3>{ 0, 1000, 0 });
+		g::gfx::debug::print{ &state.my.camera }.color({ 0, 0, 1, 1 }).ray(vec<3>{}, vec<3>{ 0, 0, 1000 });
+	}
 
 	glDisable(GL_DEPTH_TEST);
 	auto b = ld50::nearest_body(state, player.position);
 	//text.draw(assets.shader("basic_gui.vs+basic_font.fs"), b.name, mat<4, 4>::I(), mat<4, 4>::scale({ 1.f, 1.f, 1.f }));
-	text.using_shader(assets.shader("basic_gui.vs+basic_font.fs"), b.name, [&](g::gfx::shader::usage& usage) {
-		usage["u_font_color"].vec4({ 1, 1, 1, 1 })
-			["u_view"].mat4(mat<4, 4>::I())
-			["u_proj"].mat4(mat<4, 4>::I())
-			["u_model"].mat4(mat<4, 4>::I());
-	}).draw<GL_TRIANGLES>();
 	
 	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	text.using_shader(assets.shader("basic_gui.vs+basic_font.fs"), b.name, [&](g::gfx::shader::usage& usage) {
+		usage["u_font_color"].vec4({ 1, 1, 1, 1 })
+			.set_camera(state.my.camera)
+			// ["u_view"].mat4(mat<4, 4>::I())
+			// ["u_proj"].mat4(mat<4, 4>::I())
+			// ["u_model"].mat4(mat<4, 4>::scale(vec<3>{1, 1, 1} * sin(state.time)));
+			["u_model"].mat4(mat<4,4>::translation(player.position));
+	}).draw<GL_TRIANGLES>();
+	
+	auto w = g::gfx::width();
+	auto h = g::gfx::height();
+
+	glDisable(GL_DEPTH_TEST);
+	auto us = text.using_shader(assets.shader("basic_gui.vs+basic_font.fs"), b.name, [&](g::gfx::shader::usage& usage) {
+		usage["u_font_color"].vec4({ 1, 1, 1, 1 })
+			// .set_camera(state.my.camera)
+			["u_view"].mat4(mat<4, 4>::I())
+			["u_proj"].mat4(mat<4, 4>::orthographic(1, -1, w * -0.5f, w * 0.5f, h * 0.5f, h * -0.5f))
+			["u_model"].mat4(mat<4, 4>::scale(vec<3>{1, 1, 1} * 1.f));
+			// ["u_model"].mat4(mat<4,4>::translation(player.position));
+	});
+	us.draw<GL_TRIANGLES>();
+	glEnable(GL_DEPTH_TEST);
+
 
 	state.my.camera.position -= shake;
 }

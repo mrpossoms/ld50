@@ -16,4 +16,5 @@ void main (void)
     color = u_font_color;
     //color.a *= a;
     color *= texture(u_texture, uv);
+    color += vec4(0.1, 0.0, 0.0, 0.1);
 }
