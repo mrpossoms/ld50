@@ -34,10 +34,10 @@ def markov_chain(file):
 		N += 1
 
 	# normalize probabilities of transition 
-	for r in range(M.shape[0]):
-		n = M[r].sum()
-		if n > 0:
-			M[r] /= n
+	# for r in range(M.shape[0]):
+	# 	n = M[r].sum()
+	# 	if n > 0:
+	# 		M[r] /= n
 
 	# normalize probability of given name len_hist
 	lengths = []
@@ -67,14 +67,20 @@ def markov_chain(file):
 		else:
 			i = np.argmax(M[i])
 
-	print(name)
-
 	# TODO: capture termination case
 	print(M)
 	print(lengths)
 
+	print('{')
+	for r in range(M.shape[0]):
+		row = ''
+		for c in M[r]:
+			row += f'{c}, '
 
+		print(f'{ {row} },')
+	print('}')
 
+	print(name)
 
 if __name__ == '__main__':
 
