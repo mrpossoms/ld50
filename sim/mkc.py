@@ -45,16 +45,25 @@ def markov_chain(file):
 		len_hist[k] /= N
 		lengths.append(k)
 
+	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	vowels = 'AEIOU'
 	n = random.choice(lengths)
 	name = ''
-	i = ord(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')) - ord('0')
+	i = ord(random.choice(alphabet)) - ord('0')
 
 	for _ in range(n):
 		name += chr(i + ord('0'))
 		# print(M[i])
 
 		if random.random() < 0.25:
-			i = ord(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')) - ord('0')
+			no_vowels = True
+			for c in vowels:
+				no_vowels |= (c in name)
+			
+			if no_vowels:
+				i = ord(random.choice(vowels)) - ord('0')
+			else:
+				i = ord(random.choice(alphabet)) - ord('0')
 		else:
 			i = np.argmax(M[i])
 
