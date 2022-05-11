@@ -1,4 +1,5 @@
 #include "mechanics.hpp"
+#include "names.hpp"
 
 #include <g.h>
 #include <random>
@@ -192,7 +193,7 @@ static void populate(ld50::body& parent, unsigned bodies, std::default_random_en
 		body.orbit_period = 0.1 * M_PI * sqrtf(pow(sma, 3) / parent.mass);
 		body.orbit_true_anomoly = stanard_dist(generator) * 2 * M_PI;
 
-		body.name = std::to_string(rand());
+		body.name = ld50::planet_name(generator);
 
 		parent.satellites.push_back(body);
 		bodies -= 1;
