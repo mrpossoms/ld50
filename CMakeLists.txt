@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(ld50 VERSION 0.0.1 LANGUAGES CXX)
+project(ld52 VERSION 0.0.1 LANGUAGES CXX)
 
 if(CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
   message(" * C++ compiler: Emscripten")
@@ -50,9 +50,20 @@ set(SOURCE ${SOURCE} src/renderer.cpp)
 set(SOURCE ${SOURCE} src/mechanics.cpp)
 set(SOURCE ${SOURCE} src/names.cpp)
 
+# add_executable(${PROJECT_NAME} ${SOURCE})
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE})            
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    BUNDLE True
+    MACOSX_BUNDLE_GUI_IDENTIFIER my.domain.style.identifier.${PROJECT_NAME}
+    MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
+    MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/customtemplate.plist.in
+)
+
 # add game includes
-include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/gitman_sources/g.h/inc)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/gitman_sources/g.h/inc)
 
 add_subdirectory(gitman_sources/g.h)
 
@@ -63,8 +74,6 @@ set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
 # find_package(OpenAL REQUIRED)
-
-add_executable(${PROJECT_NAME} ${SOURCE})
 
 target_link_libraries(${PROJECT_NAME} g)
 target_link_libraries(${PROJECT_NAME} glfw)

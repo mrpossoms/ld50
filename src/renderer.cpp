@@ -170,7 +170,7 @@ void ld50::renderer::draw_game(ld50::state& state)
 			auto itr = voxel_meshes.find(player.name);
 			if (itr == voxel_meshes.end())
 			{
-				auto& vox = assets.vox("cockpit_0.vox");
+				auto& vox = assets.vox("cockpit_0.vox").flatten();
 				auto com = vox.center_of_mass(true);
 
 				voxel_meshes[player.name] = g::gfx::mesh_factory::from_voxels<g::gfx::vertex::pos_norm_color>(

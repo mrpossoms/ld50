@@ -5,7 +5,7 @@ sources:
     repo: https://github.com/mrpossoms/g.h.git
     sparse_paths:
       -
-    rev: github-actions 
+    rev: main 
   - name: emsdk
     type: git
     repo: https://github.com/emscripten-core/emsdk.git
