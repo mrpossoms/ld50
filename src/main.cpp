@@ -19,30 +19,30 @@ struct ld50_game : public g::core
 	g::asset::store assets;
 	ld50::state state;
 	std::unique_ptr<ld50::renderer> renderer;
-	std::unordered_map<std::string, g::game::object> object_map;
+	std::unordered_map<std::string, g::game::object> objects;
 	
 	ld50_game(const char* root) : assets(root ? std::string(root) : "data") {}
 	~ld50_game() = default;
 
-	g::game::object& object(const std::string& name, const g::game::object::multi_trait_map traits)
+	g::game::object& object(const std::string& name, const g::game::object::multi_trait_map& traits)
 	{
-		auto itr = object_map.find(name);
-		if (object_map.end() == itr)
+		auto itr = objects.find(name);
+		if (objects.end() == itr)
 		{
-			object_map[name] = g::game::object(&assets, assets.get_root_path() + "/" + name, traits);
+			objects[name] = g::game::object(&assets, assets.get_root_path() + "/" + name, traits);
 		}
 
-		return object_map[name];
+		return objects[name];
 	}
 
 	g::game::object& object(const std::string& name)
 	{
-		return object_map[name];
+		return objects[name];
 	}
 
 	virtual bool initialize()
 	{
-		renderer = std::make_unique<ld50::renderer>(assets, object_map);
+		renderer = std::make_unique<ld50::renderer>(assets, objects);
 
 
 		//ld50::body star;
@@ -93,29 +93,38 @@ struct ld50_game : public g::core
 	{
 
 		object("player-ship.yaml", {
-			{ "traits", {
-				{ "fuel", 100 },
-				{ "thrust_per_fuel", 2 },
-				{ "cam_x", 0},
-				{ "cam_y", 20},
-				{ "cam_z", 20},
-				{ "gravity_thrust_mult", 10 },
-				{ "cam_spring", 10 },
-			}},
+			{ 
+				"traits", 
+				{
+					{ "fuel", 100.f },
+					{ "thrust_per_fuel", 2.f },
+					{ "cam_x", 0.f},
+					{ "cam_y", 20.f},
+					{ "cam_z", 20.f},
+					{ "gravity_thrust_mult", 10.f },
+					{ "cam_spring", 10.f },
+				}
+		  },
 			
-			{ "textures", {
-				{ "diffuse", "player.diffuse.png" },
-			}},
+			{ 
+				"textures", 
+				{
+					{ "diffuse", "player.diffuse.png" },
+				}
+			},
 			
-			{ "geometry", {
-				{ "hull", "player.hull.obj"},
-			}},
+			{ 
+				"geometry", 
+				{
+					{ "hull", "player.hull.obj"},
+				}
+			},
 		});
 
 		object("game.yaml", {
 			{ "traits", {
-				{ "max_time_delta", 0.1 },
-				{ "camera_shake_amp", 0.05 },
+				{ "max_time_delta", 0.1f },
+				{ "camera_shake_amp", 0.05f },
 			}
 		}});
 
@@ -133,11 +142,11 @@ struct ld50_game : public g::core
 		auto camera_orbit_target = state.my.camera.orientation.rotate(cam_pos) + player.position;
 		state.my.camera.position = state.my.camera.position.lerp(camera_orbit_target, dt * std::get<float>(player_traits["cam_spring"]));
 
-		ld50::handle_controls(state, object_map, dt);
+		ld50::handle_controls(state, objects, dt);
 
 		auto f = ld50::force_at_point(state, player.position, state.time);
 		dt /= f.magnitude();
-		dt = std::min<float>(dt, std::get<float>(object("game.yaml").traits()["max_time_delta"]));
+		dt = std::min<float>(dt, std::get<float>(objects["game.yaml"].traits()["max_time_delta"]));
 
 		// ld50::update_body_velocities(state, dt);
 		ld50::update_body_positions(state, state.bodies[0], {});

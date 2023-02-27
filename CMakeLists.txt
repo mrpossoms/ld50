@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(ld52 VERSION 0.0.1 LANGUAGES CXX)
+project(ld50 VERSION 0.0.1 LANGUAGES CXX)
 
 if(CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
   message(" * C++ compiler: Emscripten")
@@ -50,8 +50,8 @@ set(SOURCE ${SOURCE} src/renderer.cpp)
 set(SOURCE ${SOURCE} src/mechanics.cpp)
 set(SOURCE ${SOURCE} src/names.cpp)
 
-# add_executable(${PROJECT_NAME} ${SOURCE})
-add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE})            
+if (BUILD_MACOS_APP)
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE})  
 set_target_properties(${PROJECT_NAME} PROPERTIES
     BUNDLE True
     MACOSX_BUNDLE_GUI_IDENTIFIER my.domain.style.identifier.${PROJECT_NAME}
@@ -60,6 +60,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/customtemplate.plist.in
 )
+else()
+add_executable(${PROJECT_NAME} ${SOURCE})
+endif()
 
 # add game includes
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
